@@ -1,0 +1,15 @@
+# .github/marketplace.yml
+# GitHub Marketplace 清单 — skill-guard GitHub Action
+# 更多信息: https://docs.github.com/cn/actions/creating-actions/publishing-actions-in-github-marketplace
+
+name: skill-guard Scan
+description: "Scan AI skill files for security risks using skill-guard — 100+ built-in rules, AI-assisted prompt injection & data leak detection, CI/CD ready with SARIF output"
+author: wjames2000
+icon: shield
+color: green
+categories:
+  - code-review
+  - security
+  - ai
+  - dependency-management
+  - continuous-integration
