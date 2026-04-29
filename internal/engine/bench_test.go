@@ -40,3 +40,31 @@ subprocess.call(["ls"])
 		eng.Match(target)
 	}
 }
+
+func BenchmarkEngine_Match_All100Rules(b *testing.B) {
+	eng, _ := New("", false)
+	dir := b.TempDir()
+	content := []byte{}
+	for i := 0; i < 100; i++ {
+		content = append(content, []byte("key = \"AKIAIOSFODNN7EXAMPLE\"\nos.system(\"ls\")\nchmod 777 /var\ncat ~/.ssh/id_rsa\n")...)
+	}
+	path := filepath.Join(dir, "mixed.py")
+	os.WriteFile(path, content, 0644)
+	target := &pkgtypes.FileTarget{Path: path, RelPath: "mixed.py", Ext: ".py"}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		eng.Match(target)
+	}
+}
+
+func BenchmarkEngine_Match_EmptyFile(b *testing.B) {
+	eng, _ := New("", false)
+	dir := b.TempDir()
+	path := filepath.Join(dir, "empty.py")
+	os.WriteFile(path, []byte{}, 0644)
+	target := &pkgtypes.FileTarget{Path: path, RelPath: "empty.py", Ext: ".py"}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		eng.Match(target)
+	}
+}

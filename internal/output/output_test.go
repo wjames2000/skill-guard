@@ -111,3 +111,20 @@ func TestSummaryRenderer(t *testing.T) {
 		t.Error("应包含耗时")
 	}
 }
+
+func TestSeverityFilter_InvalidLevel(t *testing.T) {
+	results := []*pkgtypes.MatchResult{{Severity: "Critical"}, {Severity: "High"}}
+	filtered := SeverityFilter(results, "invalid")
+	if len(filtered) != 2 {
+		t.Errorf("无效级别应返回全部，得到 %d", len(filtered))
+	}
+}
+
+func TestQuietRenderer_Empty(t *testing.T) {
+	report := &pkgtypes.ScanReport{Results: []*pkgtypes.MatchResult{}}
+	var buf bytes.Buffer
+	(&QuietRenderer{}).Render(&buf, report)
+	if buf.Len() != 0 {
+		t.Error("空结果 quiet 模式应无输出")
+	}
+}

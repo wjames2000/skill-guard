@@ -113,3 +113,25 @@ func TestDiscover_NonUTF8(t *testing.T) {
 		t.Error("binary.py 应被 discover 发现（engine 层会跳过）")
 	}
 }
+
+func TestDiscover_EmptyRoot(t *testing.T) {
+	files, err := Discover([]string{}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(files) != 0 {
+		t.Errorf("空路径应返回空，得到 %d", len(files))
+	}
+}
+
+func TestDiscover_IgnorePattern(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "test.py"), []byte("x=1"), 0644)
+	os.WriteFile(filepath.Join(dir, "test.md"), []byte("# doc"), 0644)
+	files, _ := Discover([]string{dir}, &DiscoverOpts{ExtExclude: []string{".md"}})
+	for _, f := range files {
+		if f.Ext == ".md" {
+			t.Error(".md 文件应被排除")
+		}
+	}
+}

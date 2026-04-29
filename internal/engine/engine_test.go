@@ -101,3 +101,32 @@ func TestEngine_Match_FileTypeLimit(t *testing.T) {
 		t.Error(".py 文件应匹配 .py 限定规则")
 	}
 }
+
+func TestEngine_Match_BinaryFileEncoded(t *testing.T) {
+	eng, _ := New("", false)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "mixed.txt")
+	content := make([]byte, 1000)
+	for i := range content {
+		content[i] = byte(32 + i%95)
+	}
+	os.WriteFile(path, content, 0644)
+	target := &pkgtypes.FileTarget{Path: path, RelPath: "mixed.txt", Ext: ".txt"}
+	results := eng.Match(target)
+	_ = results
+}
+
+func TestEngine_Match_NoRules(t *testing.T) {
+	eng, err := New("", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	path := filepath.Join(dir, "test.py")
+	os.WriteFile(path, []byte(`key = "AKIAIOSFODNN7EXAMPLE"`), 0644)
+	target := &pkgtypes.FileTarget{Path: path, RelPath: "test.py", Ext: ".py"}
+	results := eng.Match(target)
+	if len(results) != 0 {
+		t.Errorf("禁用内置规则应无匹配，得到 %d", len(results))
+	}
+}

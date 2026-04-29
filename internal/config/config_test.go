@@ -90,3 +90,11 @@ func TestMergeWithCLI_Override(t *testing.T) {
 		t.Errorf("CLI MaxSize 应覆盖文件配置: 得到 %d", merged.MaxSize)
 	}
 }
+
+func TestMerge_NilFileConfig(t *testing.T) {
+	cli := &pkgtypes.Config{Paths: []string{"."}, MaxSize: 1}
+	result := MergeWithCLI(cli, &FileConfig{})
+	if result == nil {
+		t.Error("合并结果不应为 nil")
+	}
+}

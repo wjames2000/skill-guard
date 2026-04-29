@@ -55,3 +55,10 @@ func TestAggregate_SameSeverity(t *testing.T) {
 		t.Errorf("同级别 3 条去重后期望 3, 得到 %d", len(agg))
 	}
 }
+
+func TestAggregate_NilInput(t *testing.T) {
+	agg := Aggregate(nil)
+	if len(agg) != 0 {
+		t.Errorf("nil 输入应返回空切片，得到 %d", len(agg))
+	}
+}
