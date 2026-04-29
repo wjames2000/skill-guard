@@ -8,6 +8,8 @@
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-linux%20|%20macOS%20|%20windows-lightgrey)](https://github.com/wjames2000/skill-guard/releases)
 
+English | [中文](https://github.com/wjames2000/skill-guard/blob/main/README_ZH.md)
+
 ---
 
 **skill-guard** is a command‑line security scanner purpose‑built for AI‑assisted development ecosystems.  

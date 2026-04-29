@@ -8,6 +8,8 @@
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![platform](https://img.shields.io/badge/平台-linux%20|%20macOS%20|%20windows-lightgrey)](https://github.com/wjames2000/skill-guard/releases)
 
+[English](https://github.com/wjames2000/skill-guard/blob/main/README.md) | 中文
+
 ---
 
 **skill-guard** 是一款面向 AI 辅助开发场景的命令行安全扫描工具。  
