@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/hpds.cc/skill-guard/cmd"
 
 func main() {
-	fmt.Println("skill-guard v0.1.0")
+	cmd.Execute()
 }

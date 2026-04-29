@@ -32,7 +32,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		Paths:       []string{"."},
 		MaxSize:     10 * 1024 * 1024,
-		Concurrency: 0,
+		Concurrency: 0, // 0 表示运行时使用 runtime.NumCPU()
 	}
 }
 
