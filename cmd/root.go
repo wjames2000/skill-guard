@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/hpds.cc/skill-guard/pkg/types"
@@ -65,12 +66,17 @@ func parseFlags() *types.Config {
 		case "--max-size":
 			i++
 			if i < len(args) {
-				// 详细解析在 config 模块中处理
-				cfg.MaxSize = 10 * 1024 * 1024
+				if v, err := parseMaxSizeFlag(args[i]); err == nil {
+					cfg.MaxSize = v
+				}
 			}
 		case "--concurrency":
 			i++
-			// 保留给后续 config 合并
+			if i < len(args) {
+				if v, err := strconv.Atoi(args[i]); err == nil && v > 0 {
+					cfg.Concurrency = v
+				}
+			}
 		case "--disable-builtin":
 			cfg.DisableBuiltin = true
 		case "--version":
@@ -81,8 +87,6 @@ func parseFlags() *types.Config {
 			os.Exit(0)
 		default:
 			if !strings.HasPrefix(args[i], "-") {
-				if len(cfg.Paths) == 1 && cfg.Paths[0] == "." && !hasPositional(args, i) {
-				}
 				if i == 0 || strings.HasPrefix(args[i-1], "-") {
 					cfg.Paths = []string{args[i]}
 				} else {
@@ -94,13 +98,25 @@ func parseFlags() *types.Config {
 	return cfg
 }
 
-func hasPositional(args []string, upTo int) bool {
-	for i := 0; i < upTo; i++ {
-		if !strings.HasPrefix(args[i], "-") {
-			return true
-		}
+func parseMaxSizeFlag(s string) (int64, error) {
+	s = strings.ToUpper(strings.TrimSpace(s))
+	multiplier := int64(1)
+	switch {
+	case strings.HasSuffix(s, "GB"):
+		multiplier = 1024 * 1024 * 1024
+		s = strings.TrimSuffix(s, "GB")
+	case strings.HasSuffix(s, "MB"):
+		multiplier = 1024 * 1024
+		s = strings.TrimSuffix(s, "MB")
+	case strings.HasSuffix(s, "KB"):
+		multiplier = 1024
+		s = strings.TrimSuffix(s, "KB")
 	}
-	return false
+	v, err := strconv.ParseInt(strings.TrimSpace(s), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return v * multiplier, nil
 }
 
 func splitExt(s string) []string {
