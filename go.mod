@@ -1,4 +1,4 @@
-module github.com/hpds.cc/skill-guard
+module github.com/wjames2000/skill-guard
 
 go 1.25.3
 

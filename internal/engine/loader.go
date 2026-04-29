@@ -9,7 +9,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	pkgtypes "github.com/hpds.cc/skill-guard/pkg/types"
+	pkgtypes "github.com/wjames2000/skill-guard/pkg/types"
 )
 
 func LoadRulesFile(path string) ([]*pkgtypes.Rule, error) {

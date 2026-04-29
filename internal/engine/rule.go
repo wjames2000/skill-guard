@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	pkgtypes "github.com/hpds.cc/skill-guard/pkg/types"
+	pkgtypes "github.com/wjames2000/skill-guard/pkg/types"
 )
 
 type Rule struct {

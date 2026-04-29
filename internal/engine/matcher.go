@@ -3,7 +3,7 @@ package engine
 import (
 	"strings"
 
-	pkgtypes "github.com/hpds.cc/skill-guard/pkg/types"
+	pkgtypes "github.com/wjames2000/skill-guard/pkg/types"
 )
 
 const maxLineContentLen = 120

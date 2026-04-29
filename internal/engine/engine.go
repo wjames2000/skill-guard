@@ -3,8 +3,8 @@ package engine
 import (
 	"fmt"
 
-	"github.com/hpds.cc/skill-guard/internal/file"
-	pkgtypes "github.com/hpds.cc/skill-guard/pkg/types"
+	"github.com/wjames2000/skill-guard/internal/file"
+	pkgtypes "github.com/wjames2000/skill-guard/pkg/types"
 )
 
 type Engine struct {

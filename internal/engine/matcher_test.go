@@ -3,7 +3,7 @@ package engine
 import (
 	"testing"
 
-	pkgtypes "github.com/hpds.cc/skill-guard/pkg/types"
+	pkgtypes "github.com/wjames2000/skill-guard/pkg/types"
 )
 
 func TestHasKeywords(t *testing.T) {

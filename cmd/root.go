@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hpds.cc/skill-guard/pkg/types"
+	"github.com/wjames2000/skill-guard/pkg/types"
 )
 
 func Execute() {
