@@ -1,0 +1,15 @@
+# rules/community-index.yaml
+version: 1
+updated: "2026-04-29"
+sources:
+  - id: official
+    name: "官方规则库"
+    description: "skill-guard 官方维护的安全检测规则"
+    url: "https://github.com/wjames2000/skill-guard/releases/latest/download/builtin_rules.yaml"
+    rules: 32
+
+  - id: community
+    name: "社区贡献规则"
+    description: "由社区贡献和维护的扩展规则集"
+    url: "https://github.com/wjames2000/skill-guard/releases/latest/download/community_rules.yaml"
+    rules: 0

@@ -108,6 +108,13 @@ func parseFlags() *pkgtypes.Config {
 			cfg.Summary = true
 		case "--sarif":
 			cfg.Sarif = true
+		case "--ai":
+			cfg.AIEnabled = true
+		case "--ai-model":
+			i++
+			if i < len(args) {
+				cfg.AIModel = args[i]
+			}
 		case "--version":
 			printVersion()
 			os.Exit(0)
@@ -122,6 +129,8 @@ func parseFlags() *pkgtypes.Config {
 			}
 		case "update":
 			handleUpdate(args[i:])
+		case "init":
+			handleInit(args[i:])
 		default:
 			if !strings.HasPrefix(args[i], "-") {
 				if i == 0 || strings.HasPrefix(args[i-1], "-") {
@@ -177,6 +186,10 @@ func runScan(cfg *pkgtypes.Config) error {
 		return err
 	}
 
+	result.Results = scanner.AIVerifyResults(result.Results, cfg)
+	result.TotalIssues = len(result.Results)
+	result.Summary = report.CalculateSummary(result.Results)
+
 	result.Results = output.SeverityFilter(result.Results, cfg.Severity)
 	result.TotalIssues = len(result.Results)
 	result.Summary = report.CalculateSummary(result.Results)
@@ -230,6 +243,8 @@ func printHelp() {
       --output string        将 JSON 结果导出到文件
       --summary              摘要模式
       --sarif                SARIF 格式输出
+      --ai                   启用 AI 辅助检测（需要本地 Ollama 服务）
+      --ai-model string      AI 模型名称（默认: llama3.2）
       --version              显示版本信息
       completion [shell]     生成 shell 自动补全（bash/zsh/fish）
   -h, --help                 显示帮助信息
@@ -237,5 +252,7 @@ func printHelp() {
 示例:
   skill-guard ./skills
   skill-guard ./skills --json --severity high
+  skill-guard init              初始化项目配置和 pre-commit hook
+  skill-guard update info       查看规则市场
   skill-guard --version`)
 }

@@ -12,4 +12,6 @@ type FileConfig struct {
 	NoColor        bool     `yaml:"no_color,omitempty"`
 	OutputFile     string   `yaml:"output,omitempty"`
 	Summary        bool     `yaml:"summary,omitempty"`
+	AIEnabled      bool     `yaml:"ai_enabled,omitempty"`
+	AIModel        string   `yaml:"ai_model,omitempty"`
 }

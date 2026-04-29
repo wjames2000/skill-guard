@@ -31,6 +31,8 @@ type Config struct {
 	OutputFile     string
 	Summary        bool
 	Sarif          bool
+	AIEnabled      bool
+	AIModel        string
 }
 
 func DefaultConfig() *Config {

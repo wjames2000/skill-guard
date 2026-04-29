@@ -41,6 +41,12 @@ func MergeWithCLI(cfg *pkgtypes.Config, fileCfg *FileConfig) *pkgtypes.Config {
 	if !cfg.Summary {
 		cfg.Summary = fileCfg.Summary
 	}
+	if !cfg.AIEnabled {
+		cfg.AIEnabled = fileCfg.AIEnabled
+	}
+	if cfg.AIModel == "" {
+		cfg.AIModel = fileCfg.AIModel
+	}
 	return cfg
 }
 

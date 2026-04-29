@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/wjames2000/skill-guard/internal/ai"
 	"github.com/wjames2000/skill-guard/internal/engine"
 	"github.com/wjames2000/skill-guard/internal/file"
 	"github.com/wjames2000/skill-guard/internal/report"
@@ -78,6 +79,41 @@ func Scan(cfg *pkgtypes.Config) (*pkgtypes.ScanReport, error) {
 
 	r := report.Build(allResults, len(files), start)
 	return r, nil
+}
+
+func AIVerifyResults(results []*pkgtypes.MatchResult, cfg *pkgtypes.Config) []*pkgtypes.MatchResult {
+	if !cfg.AIEnabled {
+		return results
+	}
+
+	aiCfg := &ai.AIConfig{
+		Enabled: cfg.AIEnabled,
+		Model:   cfg.AIModel,
+	}
+
+	if !ai.IsAvailable("") {
+		fmt.Fprintln(os.Stderr, "⚠️ AI 检测不可用: Ollama 未运行，跳过 AI 验证")
+		return results
+	}
+
+	var verified []*pkgtypes.MatchResult
+	for _, r := range results {
+		if r.LineContent == "" {
+			verified = append(verified, r)
+			continue
+		}
+		malicious, reason, err := ai.Analyze(r.LineContent, aiCfg)
+		if err != nil {
+			verified = append(verified, r)
+			continue
+		}
+		if malicious {
+			verified = append(verified, r)
+		} else if cfg.Verbose {
+			fmt.Fprintf(os.Stderr, "AI 判定非恶意: [%s] %s (%s)\n", r.RuleID, r.FilePath, reason)
+		}
+	}
+	return verified
 }
 
 func emptyReport(start time.Time) *pkgtypes.ScanReport {
