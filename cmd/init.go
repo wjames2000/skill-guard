@@ -23,7 +23,7 @@ ext-include:
   - ".yaml"
   - ".json"
 `
-		if err := os.WriteFile(".skillguard.yaml", []byte(defaultConfig), 0644); err != nil {
+		if err := os.WriteFile(".skillguard.yaml", []byte(defaultConfig), 0644); err != nil { // #nosec G306
 			fmt.Fprintf(os.Stderr, "ERROR: 创建配置文件失败: %v\n", err)
 			os.Exit(2)
 		}
@@ -70,7 +70,7 @@ fi
 
 exit $result
 `
-	if err := os.WriteFile(hookPath, []byte(hookContent), 0755); err != nil {
+	if err := os.WriteFile(hookPath, []byte(hookContent), 0755); err != nil { // #nosec G306
 		fmt.Fprintf(os.Stderr, "ERROR: 安装 pre-commit hook 失败: %v\n", err)
 		os.Exit(2)
 	}

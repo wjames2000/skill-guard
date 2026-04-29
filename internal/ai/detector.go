@@ -24,10 +24,10 @@ type AIConfig struct {
 
 // OpenAI-compatible chat completion request
 type chatRequest struct {
-	Model    string        `json:"model"`
-	Messages []chatMessage `json:"messages"`
-	Stream   bool          `json:"stream"`
-	MaxTokens int          `json:"max_tokens,omitempty"`
+	Model     string        `json:"model"`
+	Messages  []chatMessage `json:"messages"`
+	Stream    bool          `json:"stream"`
+	MaxTokens int           `json:"max_tokens,omitempty"`
 }
 
 type chatMessage struct {
@@ -205,7 +205,7 @@ func IsAvailable(endpoint string) bool {
 		if err != nil {
 			return false
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return resp.StatusCode == 200
 	}
 
@@ -214,6 +214,6 @@ func IsAvailable(endpoint string) bool {
 	if err != nil {
 		return false
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 	return resp.StatusCode == 200
 }
