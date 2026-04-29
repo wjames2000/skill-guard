@@ -6,11 +6,27 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wjames2000/skill-guard/pkg/types"
+	"github.com/wjames2000/skill-guard/internal/config"
+	"github.com/wjames2000/skill-guard/internal/output"
+	"github.com/wjames2000/skill-guard/internal/report"
+	"github.com/wjames2000/skill-guard/internal/scanner"
+	pkgtypes "github.com/wjames2000/skill-guard/pkg/types"
 )
 
 func Execute() {
 	cfg := parseFlags()
+
+	configPath := cfg.ConfigFile
+	if configPath == "" {
+		configPath = ".skillguard.yaml"
+	}
+	fileCfg, err := config.LoadFile(configPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+		os.Exit(2)
+	}
+	cfg = config.MergeWithCLI(cfg, fileCfg)
+
 	if err := cfg.Validate(); err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 		os.Exit(2)
@@ -21,8 +37,8 @@ func Execute() {
 	}
 }
 
-func parseFlags() *types.Config {
-	cfg := types.DefaultConfig()
+func parseFlags() *pkgtypes.Config {
+	cfg := pkgtypes.DefaultConfig()
 	args := os.Args[1:]
 
 	for i := 0; i < len(args); i++ {
@@ -130,8 +146,21 @@ func splitExt(s string) []string {
 	return parts
 }
 
-func runScan(cfg *types.Config) error {
-	fmt.Fprintf(os.Stderr, "skill-guard 扫描中...\n路径: %v\n", cfg.Paths)
+func runScan(cfg *pkgtypes.Config) error {
+	result, err := scanner.Scan(cfg)
+	if err != nil {
+		return err
+	}
+
+	result.Results = output.SeverityFilter(result.Results, cfg.Severity)
+	result.TotalIssues = len(result.Results)
+	result.Summary = report.CalculateSummary(result.Results)
+
+	output.Render(os.Stdout, result, cfg.JSONOutput, cfg.Quiet)
+
+	if result.TotalIssues > 0 {
+		os.Exit(1)
+	}
 	return nil
 }
 
