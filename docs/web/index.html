@@ -1155,7 +1155,7 @@
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             <path d="M9 12l2 2 4-4"/>
           </svg>
-          v0.1.0 · MIT License
+          v0.2.0 · MIT License
         </div>
 
         <h1 class="hero-title">
@@ -1165,12 +1165,12 @@
 
         <p class="hero-desc">
           检测 AI 辅助开发中第三方 Skill 文件的安全风险。<br>
-          零依赖、即开即用、为开发者而生。
+          AI 语义分析、规则市场、平台集成，全面守护开发安全。
         </p>
 
         <div class="hero-install">
           <div class="hero-command">
-            <code class="hero-command-code">curl -sfL https://git.io/skill-guard | sh</code>
+            <code class="hero-command-code">curl -sfL https://github.com/wjames2000/skill-guard/releases/latest/download/install.sh | sh</code>
             <button class="hero-command-copy" aria-label="复制安装命令" onclick="copyCommand(this)">
               <!-- Copy icon -->
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1180,8 +1180,8 @@
             </button>
           </div>
           <div class="hero-install-alt">
-            或通过 Homebrew 安装：<code>brew tap wjames2000/tap && brew install skill-guard</code>
-            <a href="https://github.com/wjames2000/skill-guard/releases" target="_blank" rel="noopener noreferrer">→ 直接下载</a>
+            Homebrew：<code>brew tap wjames2000/tap && brew install skill-guard</code>
+            <a href="https://github.com/wjames2000/skill-guard/releases" target="_blank" rel="noopener noreferrer">→ GitHub Releases</a>
           </div>
         </div>
 
@@ -1193,7 +1193,7 @@
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            下载 v0.1.0
+            下载 v0.2.0
           </a>
           <a href="https://github.com/wjames2000/skill-guard" class="btn btn--secondary" target="_blank" rel="noopener noreferrer">
             <!-- GitHub icon -->
@@ -1229,22 +1229,25 @@
             </svg>
           </div>
           <h3 class="feature-title">零依赖部署</h3>
-          <p class="feature-desc">单一可执行文件，无需 Python、Node.js 或任何运行时环境。下载即用，彻底消除依赖链带来的复杂性和安全隐忧。</p>
-          <span class="feature-tag">Go 语言 · 静态编译</span>
+          <p class="feature-desc">单一可执行文件，无需 Python、Node.js 或任何运行时环境。内置 100 条安全检测规则，覆盖八大风险类别，下载即扫描。</p>
+          <span class="feature-tag">单二进制 · 100 规则</span>
         </div>
 
-        <!-- Feature 2: Ready to Use -->
+        <!-- Feature 2: AI Assisted -->
         <div class="feature-card">
           <div class="feature-icon">
-            <!-- Shield check icon -->
+            <!-- Brain / AI icon -->
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="M9 12l2 2 4-4"/>
+              <path d="M12 2a4 4 0 014 4c0 2-2 3-2 5v1h-4v-1c0-2-2-3-2-5a4 4 0 014-4z"/>
+              <path d="M12 17v3"/>
+              <path d="M8 21h8"/>
+              <path d="M18 8c1.5 1 2 2.5 2 4 0 2-1 3-1 5"/>
+              <path d="M6 8c-1.5 1-2 2.5-2 4 0 2 1 3 1 5"/>
             </svg>
           </div>
-          <h3 class="feature-title">即开即用</h3>
-          <p class="feature-desc">内置 32 条安全检测规则，覆盖远程执行、敏感信息泄露、文件系统滥用、网络访问和权限逃逸五大风险类别。开箱即扫描。</p>
-          <span class="feature-tag">32 规则 · 5 大类别</span>
+          <h3 class="feature-title">AI 辅助检测</h3>
+          <p class="feature-desc">集成 LLM 语义分析引擎，智能理解 Skill 文件上下文，大幅降低误报率，精准识别隐藏安全威胁。</p>
+          <span class="feature-tag">LLM · 语义分析</span>
         </div>
 
         <!-- Feature 3: CI/CD Friendly -->
@@ -1257,22 +1260,24 @@
             </svg>
           </div>
           <h3 class="feature-title">CI/CD 友好</h3>
-          <p class="feature-desc">结构化 JSON 输出格式，可直接对接流水线分析。语义化退出码让您精准判断通过/警告/失败，轻松集成到 GitHub Actions 等 CI 系统。</p>
-          <span class="feature-tag">JSON 输出 · 退出码</span>
+          <p class="feature-desc">支持 JSON / SARIF 双格式输出，原生集成 GitHub Action 与 Pre-commit hook，让安全扫描无缝融入开发流水线。</p>
+          <span class="feature-tag">JSON · SARIF · GHA</span>
         </div>
 
-        <!-- Feature 4: Extensible -->
+        <!-- Feature 4: Rule Ecosystem -->
         <div class="feature-card">
           <div class="feature-icon">
-            <!-- Puzzle / Extension icon -->
+            <!-- Grid / Market icon -->
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 20h16a2 2 0 002-2V8a2 2 0 00-2-2h-7.93a2 2 0 01-1.66-.9l-.82-1.2A2 2 0 007.93 3H4a2 2 0 00-2 2v13c0 1.1.9 2 2 2z"/>
-              <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
             </svg>
           </div>
-          <h3 class="feature-title">可扩展</h3>
-          <p class="feature-desc">支持自定义 YAML / JSON 规则文件，接口化引擎设计让您可以编写与内置规则同等能力的检测逻辑，满足私有化扫描需求。</p>
-          <span class="feature-tag">YAML · JSON · 插件化</span>
+          <h3 class="feature-title">规则生态</h3>
+          <p class="feature-desc">内置规则市场、支持自定义规则与版本管理、Shell 自动补全、skill-guard init 初始化工具，打造完整安全扫描工具链。</p>
+          <span class="feature-tag">规则市场 · 自定义 · 补全</span>
         </div>
       </div>
     </div>
@@ -1303,7 +1308,7 @@
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </div>
             <div class="community-stat-info">
-              <span class="community-stat-number">v0.1.0</span>
+              <span class="community-stat-number">v0.2.0</span>
               <span class="community-stat-label">最新版本</span>
             </div>
           </div>
@@ -1355,16 +1360,16 @@
               基础扫描
             </span>
           </div>
-          <div class="usage-block-body">
-            <span class="comment"># 扫描指定目录下的所有 Skill 文件</span><br>
-            <span style="color: var(--color-primary);">$</span> skill-guard scan ./skills<br>
+            <div class="usage-block-body">
+            <span class="comment"># 扫描当前目录下的所有 Skill 文件</span><br>
+            <span style="color: var(--color-primary);">$</span> skill-guard ./skill<br>
             <br>
             <span class="comment"># 输出示例</span><br>
-            <span style="color: #5a6478;">  Scanning 12 files in ./skills ...</span><br>
+            <span style="color: #5a6478;">  Scanning ./skill directory ...</span><br>
             <span style="color: #5a6478;">  </span><br>
-            <span class="highlight-pass">  ✓</span> README.md — <span style="color: #5a6478;">passed</span><br>
-            <span class="highlight-pass">  ✓</span> prompts.json — <span style="color: #5a6478;">passed</span><br>
-            <span class="highlight-warn">  ⚠</span> code-review.md — <span style="color: #5a6478;">suspicious patterns</span><br>
+            <span class="highlight-pass">  ✓</span> README.md — <span style="color: #5a6478;">passed (3 rules matched)</span><br>
+            <span class="highlight-pass">  ✓</span> prompts.json — <span style="color: #5a6478;">passed (5 rules matched)</span><br>
+            <span class="highlight-warn">  ⚠</span> code-review.md — <span style="color: #5a6478;">suspicious patterns (low)</span><br>
             <span class="highlight-fail">  ✗</span> deploy.yaml — <span style="color: #5a6478;">remote execution detected</span><br>
             <span class="highlight-fail">  ✗</span> db-access.md — <span style="color: #5a6478;">env variable access</span><br>
             <br>
@@ -1372,65 +1377,60 @@
           </div>
         </div>
 
-        <!-- Example 2: JSON Output -->
+        <!-- Example 2: AI Scan -->
         <div class="usage-block">
           <div class="usage-block-header">
             <span class="usage-block-label">
-              <!-- Code icon -->
+              <!-- Sparkles / AI icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/>
+                <path d="M18 17l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"/>
+              </svg>
+              AI 辅助扫描
+            </span>
+          </div>
+          <div class="usage-block-body">
+            <span class="comment"># 开启 LLM 语义分析，降低误报</span><br>
+            <span style="color: var(--color-primary);">$</span> skill-guard ./skill --ai<br>
+            <br>
+            <span class="comment"># LLM 分析输出示例</span><br>
+            <span style="color: #5a6478;">  🔍 AI analysis enabled ...</span><br>
+            <span style="color: #5a6478;">  </span><br>
+            <span class="highlight-pass">  ✓</span> README.md — <span style="color: #5a6478;">no risk (AI confirmed)</span><br>
+            <span class="highlight-warn">  ⚠</span> code-review.md — <span style="color: #5a6478;">suspicious (AI: low risk, FP)</span><br>
+            <span class="highlight-fail">  ✗</span> deploy.yaml — <span style="color: #5a6478;">remote exec (AI: high confidence)</span><br>
+            <br>
+            <span style="color: var(--color-info);">  AI reduced warnings by 40% vs rule-only mode</span>
+          </div>
+        </div>
+
+        <!-- Example 3: SARIF Output -->
+        <div class="usage-block">
+          <div class="usage-block-header">
+            <span class="usage-block-label">
+              <!-- Code / SARIF icon -->
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="16 18 22 12 16 6"/>
                 <polyline points="8 6 2 12 8 18"/>
               </svg>
-              JSON 输出（CI/CD 集成）
+              SARIF 输出
             </span>
           </div>
           <div class="usage-block-body">
-            <span style="color: var(--color-primary);">$</span> skill-guard scan . --format json | jq .<br>
+            <span class="comment"># 生成 SARIF 格式报告（GitHub Code Scanning）</span><br>
+            <span style="color: var(--color-primary);">$</span> skill-guard ./skill --sarif<br>
             <br>
-            {<br>
-            &nbsp;&nbsp;<span class="string">"version"</span>: <span class="string">"0.1.0"</span>,<br>
-            &nbsp;&nbsp;<span class="string">"scan_path"</span>: <span class="string">"."</span>,<br>
-            &nbsp;&nbsp;<span class="string">"total_files"</span>: <span class="number">12</span>,<br>
-            &nbsp;&nbsp;<span class="string">"passed"</span>: <span class="number">9</span>,<br>
-            &nbsp;&nbsp;<span class="string">"warnings"</span>: <span class="number">1</span>,<br>
-            &nbsp;&nbsp;<span class="string">"failures"</span>: <span class="number">2</span>,<br>
-            &nbsp;&nbsp;<span class="string">"results"</span>: [<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="string">"file"</span>: <span class="string">"deploy.yaml"</span>, <span class="string">"status"</span>: <span class="string">"FAIL"</span>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"risk"</span>: <span class="string">"remote_execution"</span> },<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="string">"file"</span>: <span class="string">"db-access.md"</span>, <span class="string">"status"</span>: <span class="string">"FAIL"</span>,<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"risk"</span>: <span class="string">"env_access"</span> }<br>
-            &nbsp;&nbsp;]<br>
-            }
-          </div>
-        </div>
-
-        <!-- Example 3: Severity Filtering -->
-        <div class="usage-block">
-          <div class="usage-block-header">
-            <span class="usage-block-label">
-              <!-- Filter icon -->
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="4" y1="21" x2="4" y2="14"/>
-                <line x1="4" y1="10" x2="4" y2="3"/>
-                <line x1="12" y1="21" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12" y2="3"/>
-                <line x1="20" y1="21" x2="20" y2="16"/>
-                <line x1="20" y1="12" x2="20" y2="3"/>
-                <line x1="1" y1="14" x2="7" y2="14"/>
-                <line x1="9" y1="8" x2="15" y2="8"/>
-                <line x1="17" y1="16" x2="23" y2="16"/>
-              </svg>
-              严重级别过滤
-            </span>
-          </div>
-          <div class="usage-block-body">
-            <span class="comment"># 仅显示高风险及以上问题</span><br>
-            <span style="color: var(--color-primary);">$</span> skill-guard scan . --min-severity high<br>
+            <span class="comment"># 输出示例</span><br>
+            <span style="color: #5a6478;">  {</span><br>
+            <span style="color: #5a6478;">  &nbsp;&nbsp;"version": "2.1.0",</span><br>
+            <span style="color: #5a6478;">  &nbsp;&nbsp;"runs": [{</span><br>
+            <span style="color: #5a6478;">  &nbsp;&nbsp;&nbsp;&nbsp;"tool": { "name": "skill-guard" },</span><br>
+            <span style="color: #5a6478;">  &nbsp;&nbsp;&nbsp;&nbsp;"results": [...]</span><br>
+            <span style="color: #5a6478;">  &nbsp;&nbsp;}]</span><br>
+            <span style="color: #5a6478;">  }</span><br>
             <br>
-            <span class="comment"># 退出码含义</span><br>
-            <span class="highlight-pass">  exit 0</span> — <span style="color: #5a6478;">通过（无风险）</span><br>
-            <span class="highlight-warn">  exit 1</span> — <span style="color: #5a6478;">警告（存在可疑模式）</span><br>
-            <span class="highlight-fail">  exit 2</span> — <span style="color: #5a6478;">失败（检测到安全风险）</span>
+            <span style="color: var(--color-info);">  可直接上传至 GitHub Code Scanning 或</span><br>
+            <span style="color: var(--color-info);">  集成到 GitHub Advanced Security</span>
           </div>
         </div>
       </div>

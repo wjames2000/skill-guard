@@ -1,12 +1,13 @@
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/wjames2000/skill-guard
-    rev: v0.1.0
+    rev: v0.2.0
     hooks:
       - id: skill-guard
         name: skill-guard security scan
-        description: "Scan staged files for security risks before commit"
+        description: "Scan staged files for security risks using skill-guard"
         entry: skill-guard
         language: system
         types: [text]
         args: ["--severity", "high", "--quiet"]
+        stages: [pre-commit, pre-push]

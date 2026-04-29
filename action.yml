@@ -1,0 +1,97 @@
+name: 'skill-guard Scan'
+description: 'Scan AI skill files for security risks using skill-guard'
+author: 'wjames2000'
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  path:
+    description: 'Directory or file paths to scan'
+    required: false
+    default: '.'
+  severity:
+    description: 'Minimum severity level (critical/high/medium/low)'
+    required: false
+    default: 'high'
+  format:
+    description: 'Output format (terminal/json/sarif)'
+    required: false
+    default: 'sarif'
+  args:
+    description: 'Additional arguments to pass to skill-guard'
+    required: false
+    default: ''
+  version:
+    description: 'Version of skill-guard to use'
+    required: false
+    default: 'latest'
+
+outputs:
+  exit_code:
+    description: 'Exit code (0=clean, 1=issues found)'
+    value: ${{ steps.scan.outputs.exit_code }}
+  issues_count:
+    description: 'Number of issues found'
+    value: ${{ steps.scan.outputs.issues_count }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download skill-guard
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        if [ "$VERSION" = "latest" ]; then
+          VERSION=$(curl -sfL https://api.github.com/repos/wjames2000/skill-guard/releases/latest | python3 -c "import json,sys;print(json.load(sys.stdin)['tag_name'])" 2>/dev/null || echo "v0.2.0")
+        fi
+        ARCH=$(uname -m)
+        case "$ARCH" in
+          x86_64) ARCH="amd64" ;;
+          aarch64|arm64) ARCH="arm64" ;;
+          *) echo "Unsupported arch: $ARCH"; exit 1 ;;
+        esac
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        BINARY="skill-guard-${OS}-${ARCH}"
+        URL="https://github.com/wjames2000/skill-guard/releases/download/${VERSION}/${BINARY}"
+        echo "Downloading $URL..."
+        curl -sfL "$URL" -o /usr/local/bin/skill-guard
+        chmod +x /usr/local/bin/skill-guard
+        echo "skill-guard $VERSION installed"
+
+    - name: Run skill-guard scan
+      id: scan
+      shell: bash
+      continue-on-error: false
+      run: |
+        FORMAT_FLAG=""
+        case "${{ inputs.format }}" in
+          json) FORMAT_FLAG="--json" ;;
+          sarif) FORMAT_FLAG="--sarif" ;;
+          terminal) FORMAT_FLAG="" ;;
+        esac
+
+        set +e
+        OUTPUT=$(skill-guard ${{ inputs.path }} --severity ${{ inputs.severity }} $FORMAT_FLAG ${{ inputs.args }} 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        echo "$OUTPUT"
+
+        if [ "${{ inputs.format }}" = "json" ] || [ "${{ inputs.format }}" = "sarif" ]; then
+          if command -v python3 &> /dev/null; then
+            if [ "${{ inputs.format }}" = "sarif" ]; then
+              ISSUES=$(echo "$OUTPUT" | python3 -c "import json,sys;d=json.load(sys.stdin);print(len(d['runs'][0]['results']))" 2>/dev/null || echo "0")
+            else
+              ISSUES=$(echo "$OUTPUT" | python3 -c "import json,sys;d=json.load(sys.stdin);print(d['total_issues'])" 2>/dev/null || echo "0")
+            fi
+          else
+            ISSUES="unknown"
+          fi
+        else
+          ISSUES="unknown"
+        fi
+
+        echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+        echo "issues_count=$ISSUES" >> $GITHUB_OUTPUT
+        exit $EXIT_CODE

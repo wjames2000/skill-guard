@@ -90,7 +90,7 @@ const (
 	defaultRulesURL = "https://github.com/wjames2000/skill-guard/releases/latest/download/builtin_rules.yaml"
 	updateCheckURL  = "https://api.github.com/repos/wjames2000/skill-guard/releases/latest"
 	rulesIndexURL   = "https://github.com/wjames2000/skill-guard/releases/latest/download/community-index.yaml"
-	AppVersion      = "v0.1.0"
+	AppVersion      = "v0.2.0"
 )
 
 type ReleaseInfo struct {

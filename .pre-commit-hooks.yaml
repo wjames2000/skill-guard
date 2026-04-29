@@ -1,0 +1,9 @@
+- id: skill-guard
+  name: skill-guard security scan
+  description: "Scan staged files for security risks using skill-guard"
+  entry: skill-guard
+  language: system
+  types: [text]
+  args: ["--severity", "high", "--quiet"]
+  stages: [pre-commit, pre-push]
+  minimum_pre_commit_version: "2.9.0"
