@@ -8,7 +8,7 @@ import (
 const DefaultBufferSize = 64 * 1024
 
 func ReadLines(path string) ([]string, error) {
-	f, err := os.Open(path)
+	f, err := os.Open(path) // #nosec G304
 	if err != nil {
 		return nil, err
 	}

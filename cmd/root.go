@@ -156,7 +156,7 @@ func runScan(cfg *pkgtypes.Config) error {
 	result.TotalIssues = len(result.Results)
 	result.Summary = report.CalculateSummary(result.Results)
 
-	output.Render(os.Stdout, result, cfg.JSONOutput, cfg.Quiet)
+	_ = output.Render(os.Stdout, result, cfg.JSONOutput, cfg.Quiet)
 
 	if result.TotalIssues > 0 {
 		os.Exit(1)

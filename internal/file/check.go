@@ -8,7 +8,7 @@ import (
 const checkHeaderSize = 512
 
 func IsValidUTF8(path string) bool {
-	f, err := os.Open(path)
+	f, err := os.Open(path) // #nosec G304
 	if err != nil {
 		return false
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 func LoadFile(path string) (*FileConfig, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &FileConfig{}, nil

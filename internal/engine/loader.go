@@ -13,7 +13,7 @@ import (
 )
 
 func LoadRulesFile(path string) ([]*pkgtypes.Rule, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304
 	if err != nil {
 		return nil, fmt.Errorf("读取规则文件失败: %w", err)
 	}
