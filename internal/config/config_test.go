@@ -68,3 +68,25 @@ func TestParseMaxSize(t *testing.T) {
 		}
 	}
 }
+
+func TestLoadFile_Malformed(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".skillguard.yaml")
+	os.WriteFile(path, []byte(": invalid yaml [[["), 0644)
+	_, err := LoadFile(path)
+	if err == nil {
+		t.Error("格式错误的 YAML 应返回错误")
+	}
+}
+
+func TestMergeWithCLI_Override(t *testing.T) {
+	cli := &pkgtypes.Config{Severity: "high", MaxSize: 5 * 1024 * 1024}
+	fileCfg := &FileConfig{Severity: "low", MaxSize: "1MB"}
+	merged := MergeWithCLI(cli, fileCfg)
+	if merged.Severity != "high" {
+		t.Errorf("CLI severity 应覆盖文件配置: 得到 %s", merged.Severity)
+	}
+	if merged.MaxSize != 5*1024*1024 {
+		t.Errorf("CLI MaxSize 应覆盖文件配置: 得到 %d", merged.MaxSize)
+	}
+}

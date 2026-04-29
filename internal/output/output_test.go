@@ -76,3 +76,38 @@ func TestSeverityFilter(t *testing.T) {
 		t.Errorf("空过滤期望 4 条, 得到 %d", len(filtered2))
 	}
 }
+
+func TestSeverityFilter_Empty(t *testing.T) {
+	var empty []*pkgtypes.MatchResult
+	filtered := SeverityFilter(empty, "high")
+	if len(filtered) != 0 {
+		t.Errorf("空结果应返回空, 得到 %d", len(filtered))
+	}
+	filtered2 := SeverityFilter(empty, "")
+	if len(filtered2) != 0 {
+		t.Errorf("空结果+空过滤应返回空, 得到 %d", len(filtered2))
+	}
+}
+
+func TestSummaryRenderer(t *testing.T) {
+	report := &pkgtypes.ScanReport{
+		TotalFiles: 100, TotalIssues: 5,
+		Summary: &pkgtypes.Summary{Critical: 2, High: 2, Medium: 1, Low: 0},
+		Duration: "1.5s",
+	}
+	var buf bytes.Buffer
+	r := &SummaryRenderer{}
+	if err := r.Render(&buf, report); err != nil {
+		t.Fatal(err)
+	}
+	output := buf.String()
+	if !strings.Contains(output, "100") {
+		t.Error("应包含总文件数")
+	}
+	if !strings.Contains(output, "5") {
+		t.Error("应包含总风险数")
+	}
+	if !strings.Contains(output, "1.5s") {
+		t.Error("应包含耗时")
+	}
+}

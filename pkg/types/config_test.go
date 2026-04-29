@@ -33,3 +33,16 @@ func TestValidate(t *testing.T) {
 		})
 	}
 }
+
+func TestValidate_CaseInsensitive(t *testing.T) {
+	cfg := &Config{Paths: []string{"."}, Severity: "CRITICAL", MaxSize: 1}
+	err := cfg.Validate()
+	if err != nil {
+		t.Errorf("大写 CRITICAL 应通过验证: %v", err)
+	}
+	cfg2 := &Config{Paths: []string{"."}, Severity: "High", MaxSize: 1}
+	err2 := cfg2.Validate()
+	if err2 != nil {
+		t.Errorf("首字母大写 High 应通过验证: %v", err2)
+	}
+}
