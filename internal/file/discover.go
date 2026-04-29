@@ -37,6 +37,9 @@ func Discover(roots []string, opts *DiscoverOpts) ([]*pkgtypes.FileTarget, error
 				}
 				return nil
 			}
+			if d.Type()&os.ModeSymlink != 0 {
+				return nil
+			}
 			if matchIgnore(path, ignorePatterns) {
 				return nil
 			}

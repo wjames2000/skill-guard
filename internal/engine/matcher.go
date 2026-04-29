@@ -26,6 +26,11 @@ func (r *Rule) MatchLine(line string, filePath string, lineNum int) *pkgtypes.Ma
 	if r.compiled == nil {
 		return nil
 	}
+
+	defer func() {
+		recover()
+	}()
+
 	loc := r.compiled.FindStringIndex(line)
 	if loc == nil {
 		return nil
@@ -36,6 +41,7 @@ func (r *Rule) MatchLine(line string, filePath string, lineNum int) *pkgtypes.Ma
 	}
 	return &pkgtypes.MatchResult{
 		RuleID:      r.ID,
+		RuleName:    r.Name,
 		Severity:    r.Severity,
 		FilePath:    filePath,
 		LineNumber:  lineNum,

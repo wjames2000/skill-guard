@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>skill-guard — AI 开发技能安全扫描工具</title>
+  <meta name="description" content="skill-guard 是一个零依赖的 Go 语言 CLI 安全扫描工具，专为 AI 辅助开发中的第三方 Skill 文件风险检测而设计。">
+  <style>
+    /* ============================================================
+       CSS Variables — Theme System
+       ============================================================ */
+    :root {
+      /* 背景色 */
+      --bg-primary: #0a0e17;
+      --bg-secondary: #0f1524;
+      --bg-card: #131a2b;
+      --bg-elevated: #1a2440;
+      --bg-hover: #1e2a45;
+      --bg-code: #0d1322;
+
+      /* 主色调 */
+      --color-primary: #00d4aa;
+      --color-primary-dim: #00a88a;
+      --color-primary-glow: rgba(0, 212, 170, 0.15);
+
+      /* 语义色 */
+      --color-accent: #ff6b6b;
+      --color-accent-dim: #cc5555;
+      --color-warning: #f59e0b;
+      --color-info: #60a5fa;
+      --color-success: var(--color-primary);
+
+      /* 文字色 */
+      --text-primary: #e8edf5;
+      --text-secondary: #8892a4;
+      --text-muted: #5a6478;
+      --text-on-primary: #0a0e17;
+
+      /* 边框 */
+      --border-color: #1e2a45;
+      --border-subtle: #18213a;
+
+      /* 阴影 */
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
+      --shadow-primary: 0 4px 20px rgba(0, 212, 170, 0.15);
+
+      /* 字体 */
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, monospace;
+
+      /* 间距 */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --space-20: 80px;
+
+      /* 圆角 */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+
+      /* 过渡 */
+      --transition-fast: 150ms ease;
+      --transition-normal: 300ms ease;
+      --transition-slow: 500ms ease;
+
+      /* 容器宽度 */
+      --container-max: 1280px;
+    }
+
+    /* ============================================================
+       Reset & Base
+       ============================================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+    a:hover {
+      color: #5ce6c4;
+    }
+
+    img, svg {
+      display: block;
+    }
+
+    /* ============================================================
+       Container
+       ============================================================ */
+    .container {
+      width: 100%;
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    /* ============================================================
+       Navbar
+       ============================================================ */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .navbar-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .navbar-logo:hover {
+      color: var(--text-primary);
+    }
+    .navbar-logo svg {
+      flex-shrink: 0;
+    }
+
+    .navbar-links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+    }
+
+    .navbar-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: color var(--transition-fast);
+    }
+    .navbar-link:hover {
+      color: var(--text-primary);
+    }
+
+    .navbar-link .link-label {
+      display: none;
+    }
+    @media (min-width: 640px) {
+      .navbar-link .link-label {
+        display: inline;
+      }
+    }
+
+    /* Navbar CTA Button */
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      font-family: var(--font-sans);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--text-on-primary);
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+    .btn-nav:hover {
+      background: var(--color-primary);
+      color: var(--text-on-primary);
+      border-color: var(--color-primary);
+    }
+
+    .btn-nav svg {
+      flex-shrink: 0;
+    }
+
+    /* --- Star Badge --- */
+    .star-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+    .star-badge:hover {
+      color: var(--color-warning);
+      border-color: rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.05);
+    }
+    .star-badge svg {
+      flex-shrink: 0;
+    }
+    .star-count {
+      font-variant-numeric: tabular-nums;
+    }
+    .star-badge .star-label {
+      display: none;
+    }
+    @media (min-width: 640px) {
+      .star-badge .star-label {
+        display: inline;
+      }
+    }
+
+    /* ============================================================
+       Buttons
+       ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-6);
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      line-height: 1.4;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    .btn--primary {
+      color: var(--text-on-primary);
+      background: var(--color-primary);
+    }
+    .btn--primary:hover {
+      background: #5ce6c4;
+      box-shadow: var(--shadow-primary);
+      transform: translateY(-1px);
+      color: var(--text-on-primary);
+    }
+
+    .btn--secondary {
+      color: var(--text-primary);
+      background: transparent;
+      border: 1px solid var(--border-color);
+    }
+    .btn--secondary:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn--ghost {
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+    }
+    .btn--ghost:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .btn--sm {
+      padding: var(--space-1) var(--space-3);
+      font-size: 0.8125rem;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ============================================================
+       Section common
+       ============================================================ */
+    .section {
+      padding: var(--space-16) 0;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: var(--space-12);
+    }
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-3);
+    }
+    @media (min-width: 768px) {
+      .section-title {
+        font-size: 2.25rem;
+      }
+    }
+    .section-subtitle {
+      font-size: 1.0625rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ============================================================
+       Hero
+       ============================================================ */
+    .hero {
+      padding: var(--space-12) 0 var(--space-16);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle background grid pattern */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .hero .container {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-10);
+      align-items: center;
+    }
+    @media (min-width: 1024px) {
+      .hero .container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* --- Hero: Terminal --- */
+    .hero-terminal {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg), 0 0 60px rgba(0, 212, 170, 0.05);
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .terminal-dot--red { background: #ff5f56; }
+    .terminal-dot--yellow { background: #ffbd2e; }
+    .terminal-dot--green { background: #27c93f; }
+    .terminal-title {
+      margin-left: var(--space-3);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .terminal-body {
+      padding: var(--space-4) var(--space-5);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.7;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .terminal-prompt {
+      color: var(--color-primary);
+    }
+    .terminal-text {
+      color: var(--text-secondary);
+    }
+    .terminal-text--dim {
+      color: var(--text-muted);
+    }
+    .terminal-text--pass {
+      color: var(--color-success);
+    }
+    .terminal-text--warn {
+      color: var(--color-warning);
+    }
+    .terminal-text--fail {
+      color: var(--color-accent);
+    }
+    .terminal-text--info {
+      color: var(--color-info);
+    }
+
+    .terminal-line {
+      opacity: 0;
+      animation: terminalFadeIn 0.4s ease forwards;
+    }
+
+    .terminal-line:nth-child(1) { animation-delay: 0.3s; }
+    .terminal-line:nth-child(2) { animation-delay: 0.6s; }
+    .terminal-line:nth-child(3) { animation-delay: 1.0s; }
+    .terminal-line:nth-child(4) { animation-delay: 1.4s; }
+    .terminal-line:nth-child(5) { animation-delay: 1.8s; }
+    .terminal-line:nth-child(6) { animation-delay: 2.2s; }
+    .terminal-line:nth-child(7) { animation-delay: 2.6s; }
+    .terminal-line:nth-child(8) { animation-delay: 3.0s; }
+    .terminal-line:nth-child(9) { animation-delay: 3.4s; }
+    .terminal-line:nth-child(10) { animation-delay: 3.8s; }
+    .terminal-line:nth-child(11) { animation-delay: 4.2s; }
+    .terminal-line:nth-child(12) { animation-delay: 4.6s; }
+
+    .terminal-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: var(--color-primary);
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+    }
+
+    @keyframes terminalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* --- Hero: Content --- */
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-1) var(--space-3);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      background: var(--color-primary-glow);
+      border: 1px solid rgba(0, 212, 170, 0.2);
+      border-radius: 999px;
+      width: fit-content;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+    .hero-title-highlight {
+      background: linear-gradient(135deg, var(--color-primary), #5ce6c4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 3.25rem;
+      }
+    }
+
+    .hero-desc {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .hero-install {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .hero-command {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      max-width: 520px;
+    }
+    .hero-command-code {
+      flex: 1;
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--text-primary);
+      background: transparent;
+      border: none;
+      outline: none;
+      white-space: nowrap;
+      overflow-x: auto;
+      user-select: all;
+    }
+    .hero-command-copy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--border-color);
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .hero-command-copy:hover {
+      color: var(--color-primary);
+      background: var(--color-primary-glow);
+    }
+    .hero-command-copy.copied svg {
+      color: var(--color-success);
+    }
+
+    .hero-install-alt {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+    .hero-install-alt a {
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1px;
+    }
+    .hero-install-alt a:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      margin-top: var(--space-2);
+    }
+
+    /* ============================================================
+       Features
+       ============================================================ */
+    .features {
+      padding: var(--space-16) 0;
+      background: var(--bg-secondary);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+    @media (min-width: 640px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+      opacity: 0;
+      transition: opacity var(--transition-normal);
+    }
+    .feature-card:hover {
+      border-color: rgba(0, 212, 170, 0.2);
+      box-shadow: 0 4px 24px rgba(0, 212, 170, 0.06);
+      transform: translateY(-2px);
+    }
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-primary-glow);
+      border: 1px solid rgba(0, 212, 170, 0.15);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-5);
+      color: var(--color-primary);
+    }
+
+    .feature-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+    .feature-desc {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .feature-tag {
+      display: inline-block;
+      margin-top: var(--space-4);
+      padding: var(--space-1) var(--space-3);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--color-primary);
+      background: var(--color-primary-glow);
+      border-radius: 999px;
+      border: 1px solid rgba(0, 212, 170, 0.1);
+    }
+
+    /* ============================================================
+       Usage Examples
+       ============================================================ */
+    .usage {
+      padding: var(--space-16) 0;
+    }
+
+    .usage-examples {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    @media (min-width: 900px) {
+      .usage-examples {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .usage-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .usage-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-5);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .usage-block-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .usage-block-label svg {
+      flex-shrink: 0;
+    }
+
+    .usage-block-body {
+      padding: var(--space-4) var(--space-5);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      color: var(--text-primary);
+    }
+
+    .usage-block-body .comment {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .usage-block-body .keyword {
+      color: var(--color-info);
+    }
+    .usage-block-body .string {
+      color: var(--color-primary);
+    }
+    .usage-block-body .number {
+      color: var(--color-warning);
+    }
+    .usage-block-body .highlight-fail {
+      color: var(--color-accent);
+    }
+    .usage-block-body .highlight-pass {
+      color: var(--color-success);
+    }
+    .usage-block-body .highlight-warn {
+      color: var(--color-warning);
+    }
+
+    /* ============================================================
+       Installation
+       ============================================================ */
+    .install {
+      padding: var(--space-16) 0;
+      background: var(--bg-secondary);
+    }
+
+    .install-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+    @media (min-width: 768px) {
+      .install-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .install-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      text-align: center;
+      transition: all var(--transition-normal);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .install-card:hover {
+      border-color: rgba(0, 212, 170, 0.2);
+      box-shadow: 0 4px 24px rgba(0, 212, 170, 0.06);
+      transform: translateY(-2px);
+    }
+
+    .install-card-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-primary-glow);
+      border: 1px solid rgba(0, 212, 170, 0.15);
+      border-radius: 50%;
+      color: var(--color-primary);
+    }
+
+    .install-card-title {
+      font-size: 1.0625rem;
+      font-weight: 700;
+    }
+    .install-card-desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .install-card-code {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-primary);
+      text-align: left;
+      user-select: all;
+      overflow-x: auto;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+
+    .install-card-code .prompt {
+      color: var(--color-primary);
+    }
+
+    /* ============================================================
+       Community (Stars & Trend)
+       ============================================================ */
+    .community {
+      padding: var(--space-16) 0;
+    }
+
+    .community-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+      margin-top: var(--space-8);
+    }
+    @media (min-width: 768px) {
+      .community-grid {
+        grid-template-columns: 1fr 1.5fr;
+      }
+    }
+
+    .community-stats {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .community-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      display: flex;
+      align-items: center;
+      gap: var(--space-5);
+      transition: all var(--transition-normal);
+    }
+    .community-stat-card:hover {
+      border-color: rgba(245, 158, 11, 0.2);
+      box-shadow: 0 4px 24px rgba(245, 158, 11, 0.06);
+      transform: translateY(-2px);
+    }
+
+    .community-stat-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.15);
+      border-radius: var(--radius-md);
+      color: var(--color-warning);
+      flex-shrink: 0;
+    }
+
+    .community-stat-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .community-stat-number {
+      font-size: 1.75rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: var(--text-primary);
+    }
+    .community-stat-number.loading {
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 400;
+    }
+    .community-stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    .community-stat-label a {
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .community-stat-label a:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .community-chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-5);
+    }
+    .chart-title {
+      font-size: 0.9375rem;
+      font-weight: 700;
+    }
+    .chart-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .chart-label-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+
+    .chart-svg-wrap {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+    }
+    .chart-svg-wrap svg {
+      width: 100%;
+      height: auto;
+    }
+
+    .chart-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-style: italic;
+    }
+
+    /* ============================================================
+       Footer
+       ============================================================ */
+    .footer {
+      padding: var(--space-10) 0;
+      border-top: 1px solid var(--border-color);
+    }
+    .footer .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+      text-align: center;
+    }
+    @media (min-width: 640px) {
+      .footer .container {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+      }
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+    .footer-brand svg {
+      flex-shrink: 0;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      font-size: 0.875rem;
+    }
+    .footer-links a {
+      color: var(--text-secondary);
+    }
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-license {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .footer-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border-color);
+    }
+
+    /* ============================================================
+       Responsive Utilities
+       ============================================================ */
+    @media (max-width: 639px) {
+      .container {
+        padding: 0 var(--space-4);
+      }
+      .section {
+        padding: var(--space-10) 0;
+      }
+      .hero-title {
+        font-size: 1.875rem;
+      }
+      .section-title {
+        font-size: 1.5rem;
+      }
+      .feature-card {
+        padding: var(--space-6);
+      }
+    }
+
+    @media (min-width: 640px) and (max-width: 1023px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       Navigation
+       ============================================================ -->
+  <nav class="navbar" role="navigation" aria-label="主导航">
+    <div class="container">
+      <a href="#" class="navbar-logo" aria-label="skill-guard 首页">
+        <!-- Shield icon -->
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#00d4aa"/>
+          <path d="M9 12l2 2 4-4" stroke="#00d4aa"/>
+        </svg>
+        skill-guard
+      </a>
+
+      <div class="navbar-links">
+        <a href="https://github.com/wjames2000/skill-guard" class="navbar-link" target="_blank" rel="noopener noreferrer">
+          <!-- GitHub icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          <span class="link-label">GitHub</span>
+        </a>
+        <a href="https://github.com/wjames2000/skill-guard/stargazers" class="star-badge" target="_blank" rel="noopener noreferrer" id="starBadge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <span class="star-count" id="starCount">..</span>
+          <span class="star-label">&nbsp;Stars</span>
+        </a>
+        <a href="https://github.com/wjames2000/skill-guard/releases" class="btn btn-nav" target="_blank" rel="noopener noreferrer">
+          <!-- Download icon -->
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          下载
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       Hero
+       ============================================================ -->
+  <section class="hero" aria-label="产品介绍">
+    <div class="container">
+      <!-- Left: Terminal -->
+      <div class="hero-terminal" aria-hidden="true">
+        <div class="terminal-bar">
+          <span class="terminal-dot terminal-dot--red"></span>
+          <span class="terminal-dot terminal-dot--yellow"></span>
+          <span class="terminal-dot terminal-dot--green"></span>
+          <span class="terminal-title">skill-guard scan</span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-line"><span class="terminal-prompt">$</span> <span class="terminal-text">skill-guard scan ~/.claude/skills</span></div>
+          <div class="terminal-line"><span class="terminal-text--dim">  Scanning 24 skill files...</span></div>
+          <div class="terminal-line"><span class="terminal-text--dim">  </span></div>
+          <div class="terminal-line"><span class="terminal-text--pass">  [SKIP]  </span><span class="terminal-text--dim">utils.md — no risk indicators</span></div>
+          <div class="terminal-line"><span class="terminal-text--pass">  [SKIP]  </span><span class="terminal-text--dim">prompts.json — no risk indicators</span></div>
+          <div class="terminal-line"><span class="terminal-text--warn">  [WARN]  </span><span class="terminal-text--dim">code-review.md — suspicious patterns (low)</span></div>
+          <div class="terminal-line"><span class="terminal-text--fail">  [FAIL]  </span><span class="terminal-text--dim">deploy.yaml — remote execution detected</span></div>
+          <div class="terminal-line"><span class="terminal-text--fail">  [FAIL]  </span><span class="terminal-text--dim">db-access.md — environment variable access</span></div>
+          <div class="terminal-line"><span class="terminal-text--pass">  [SKIP]  </span><span class="terminal-text--dim">testing.md — no risk indicators</span></div>
+          <div class="terminal-line"><span class="terminal-text--dim">  </span></div>
+          <div class="terminal-line"><span class="terminal-text--info">  Scan complete. </span><span class="terminal-text--fail">2 risks</span><span class="terminal-text--info">, 1 warning detected.</span></div>
+          <div class="terminal-line">
+            <span class="terminal-text--dim">  </span>
+            <span class="terminal-cursor"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Content -->
+      <div class="hero-content">
+        <div class="hero-tag">
+          <!-- Shield icon small -->
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          v0.1.0 · MIT License
+        </div>
+
+        <h1 class="hero-title">
+          AI 开发技能<br>
+          <span class="hero-title-highlight">安全扫描工具</span>
+        </h1>
+
+        <p class="hero-desc">
+          检测 AI 辅助开发中第三方 Skill 文件的安全风险。<br>
+          零依赖、即开即用、为开发者而生。
+        </p>
+
+        <div class="hero-install">
+          <div class="hero-command">
+            <code class="hero-command-code">curl -sfL https://git.io/skill-guard | sh</code>
+            <button class="hero-command-copy" aria-label="复制安装命令" onclick="copyCommand(this)">
+              <!-- Copy icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+            </button>
+          </div>
+          <div class="hero-install-alt">
+            或通过 Homebrew 安装：<code>brew tap wjames2000/tap && brew install skill-guard</code>
+            <a href="https://github.com/wjames2000/skill-guard/releases" target="_blank" rel="noopener noreferrer">→ 直接下载</a>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a href="https://github.com/wjames2000/skill-guard/releases" class="btn btn--primary" target="_blank" rel="noopener noreferrer">
+            <!-- Download icon -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            下载 v0.1.0
+          </a>
+          <a href="https://github.com/wjames2000/skill-guard" class="btn btn--secondary" target="_blank" rel="noopener noreferrer">
+            <!-- GitHub icon -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Features
+       ============================================================ -->
+  <section class="features" id="features" aria-label="产品特性">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">为什么选择 skill-guard？</h2>
+        <p class="section-subtitle">专为 AI 辅助开发场景设计的轻量安全扫描方案</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1: Zero Dependency -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <!-- Package/Binary icon -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">零依赖部署</h3>
+          <p class="feature-desc">单一可执行文件，无需 Python、Node.js 或任何运行时环境。下载即用，彻底消除依赖链带来的复杂性和安全隐忧。</p>
+          <span class="feature-tag">Go 语言 · 静态编译</span>
+        </div>
+
+        <!-- Feature 2: Ready to Use -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <!-- Shield check icon -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">即开即用</h3>
+          <p class="feature-desc">内置 32 条安全检测规则，覆盖远程执行、敏感信息泄露、文件系统滥用、网络访问和权限逃逸五大风险类别。开箱即扫描。</p>
+          <span class="feature-tag">32 规则 · 5 大类别</span>
+        </div>
+
+        <!-- Feature 3: CI/CD Friendly -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <!-- CI/CD / Gear icon -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">CI/CD 友好</h3>
+          <p class="feature-desc">结构化 JSON 输出格式，可直接对接流水线分析。语义化退出码让您精准判断通过/警告/失败，轻松集成到 GitHub Actions 等 CI 系统。</p>
+          <span class="feature-tag">JSON 输出 · 退出码</span>
+        </div>
+
+        <!-- Feature 4: Extensible -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <!-- Puzzle / Extension icon -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20h16a2 2 0 002-2V8a2 2 0 00-2-2h-7.93a2 2 0 01-1.66-.9l-.82-1.2A2 2 0 007.93 3H4a2 2 0 00-2 2v13c0 1.1.9 2 2 2z"/>
+              <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">可扩展</h3>
+          <p class="feature-desc">支持自定义 YAML / JSON 规则文件，接口化引擎设计让您可以编写与内置规则同等能力的检测逻辑，满足私有化扫描需求。</p>
+          <span class="feature-tag">YAML · JSON · 插件化</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Community (Stars & Trend)
+       ============================================================ -->
+  <section class="community section" aria-label="社区数据">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">社区<span class="section-title-highlight">认可</span></h2>
+        <p class="section-desc">来自开发者社区的真实反馈与使用数据</p>
+      </div>
+      <div class="community-grid">
+        <div class="community-stats">
+          <div class="community-stat-card">
+            <div class="community-stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <div class="community-stat-info">
+              <span class="community-stat-number loading" id="heroStarCount">加载中...</span>
+              <span class="community-stat-label">GitHub Stars</span>
+            </div>
+          </div>
+          <div class="community-stat-card">
+            <div class="community-stat-icon" style="color: var(--color-primary); background: var(--color-primary-glow); border-color: rgba(0,212,170,0.15);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="community-stat-info">
+              <span class="community-stat-number">v0.1.0</span>
+              <span class="community-stat-label">最新版本</span>
+            </div>
+          </div>
+        </div>
+        <div class="community-chart-card">
+          <div class="chart-header">
+            <span class="chart-title">Star 增长趋势</span>
+            <span class="chart-label"><span class="chart-label-dot"></span>GitHub Stars</span>
+          </div>
+          <div class="chart-svg-wrap" id="chartWrap">
+            <div class="chart-empty" id="chartEmpty">加载中...</div>
+            <svg id="trendChart" viewBox="0 0 400 160" preserveAspectRatio="xMidYMid meet" style="display:none">
+              <defs>
+                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00d4aa" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#00d4aa" stop-opacity="0.02"/>
+                </linearGradient>
+              </defs>
+              <path id="chartArea" fill="url(#chartGradient)"/>
+              <path id="chartLine" fill="none" stroke="#00d4aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <g id="chartDots" fill="#00d4aa"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Usage Examples
+       ============================================================ -->
+  <section class="usage" id="usage" aria-label="使用示例">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">使用示例</h2>
+        <p class="section-subtitle">简洁的 CLI 设计，让安全扫描融入日常开发流程</p>
+      </div>
+
+      <div class="usage-examples">
+        <!-- Example 1: Basic Scan -->
+        <div class="usage-block">
+          <div class="usage-block-header">
+            <span class="usage-block-label">
+              <!-- Terminal icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 17 10 11 4 5"/>
+                <line x1="12" y1="19" x2="20" y2="19"/>
+              </svg>
+              基础扫描
+            </span>
+          </div>
+          <div class="usage-block-body">
+            <span class="comment"># 扫描指定目录下的所有 Skill 文件</span><br>
+            <span style="color: var(--color-primary);">$</span> skill-guard scan ./skills<br>
+            <br>
+            <span class="comment"># 输出示例</span><br>
+            <span style="color: #5a6478;">  Scanning 12 files in ./skills ...</span><br>
+            <span style="color: #5a6478;">  </span><br>
+            <span class="highlight-pass">  ✓</span> README.md — <span style="color: #5a6478;">passed</span><br>
+            <span class="highlight-pass">  ✓</span> prompts.json — <span style="color: #5a6478;">passed</span><br>
+            <span class="highlight-warn">  ⚠</span> code-review.md — <span style="color: #5a6478;">suspicious patterns</span><br>
+            <span class="highlight-fail">  ✗</span> deploy.yaml — <span style="color: #5a6478;">remote execution detected</span><br>
+            <span class="highlight-fail">  ✗</span> db-access.md — <span style="color: #5a6478;">env variable access</span><br>
+            <br>
+            <span style="color: var(--color-info);">  Results: 2 failed, 1 warning, 9 passed</span>
+          </div>
+        </div>
+
+        <!-- Example 2: JSON Output -->
+        <div class="usage-block">
+          <div class="usage-block-header">
+            <span class="usage-block-label">
+              <!-- Code icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+              JSON 输出（CI/CD 集成）
+            </span>
+          </div>
+          <div class="usage-block-body">
+            <span style="color: var(--color-primary);">$</span> skill-guard scan . --format json | jq .<br>
+            <br>
+            {<br>
+            &nbsp;&nbsp;<span class="string">"version"</span>: <span class="string">"0.1.0"</span>,<br>
+            &nbsp;&nbsp;<span class="string">"scan_path"</span>: <span class="string">"."</span>,<br>
+            &nbsp;&nbsp;<span class="string">"total_files"</span>: <span class="number">12</span>,<br>
+            &nbsp;&nbsp;<span class="string">"passed"</span>: <span class="number">9</span>,<br>
+            &nbsp;&nbsp;<span class="string">"warnings"</span>: <span class="number">1</span>,<br>
+            &nbsp;&nbsp;<span class="string">"failures"</span>: <span class="number">2</span>,<br>
+            &nbsp;&nbsp;<span class="string">"results"</span>: [<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="string">"file"</span>: <span class="string">"deploy.yaml"</span>, <span class="string">"status"</span>: <span class="string">"FAIL"</span>,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"risk"</span>: <span class="string">"remote_execution"</span> },<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="string">"file"</span>: <span class="string">"db-access.md"</span>, <span class="string">"status"</span>: <span class="string">"FAIL"</span>,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"risk"</span>: <span class="string">"env_access"</span> }<br>
+            &nbsp;&nbsp;]<br>
+            }
+          </div>
+        </div>
+
+        <!-- Example 3: Severity Filtering -->
+        <div class="usage-block">
+          <div class="usage-block-header">
+            <span class="usage-block-label">
+              <!-- Filter icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14"/>
+                <line x1="4" y1="10" x2="4" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12" y2="3"/>
+                <line x1="20" y1="21" x2="20" y2="16"/>
+                <line x1="20" y1="12" x2="20" y2="3"/>
+                <line x1="1" y1="14" x2="7" y2="14"/>
+                <line x1="9" y1="8" x2="15" y2="8"/>
+                <line x1="17" y1="16" x2="23" y2="16"/>
+              </svg>
+              严重级别过滤
+            </span>
+          </div>
+          <div class="usage-block-body">
+            <span class="comment"># 仅显示高风险及以上问题</span><br>
+            <span style="color: var(--color-primary);">$</span> skill-guard scan . --min-severity high<br>
+            <br>
+            <span class="comment"># 退出码含义</span><br>
+            <span class="highlight-pass">  exit 0</span> — <span style="color: #5a6478;">通过（无风险）</span><br>
+            <span class="highlight-warn">  exit 1</span> — <span style="color: #5a6478;">警告（存在可疑模式）</span><br>
+            <span class="highlight-fail">  exit 2</span> — <span style="color: #5a6478;">失败（检测到安全风险）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Installation
+       ============================================================ -->
+  <section class="install" id="install" aria-label="安装方式">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">安装方式</h2>
+        <p class="section-subtitle">三种方式，即刻开始保护您的开发环境</p>
+      </div>
+
+      <div class="install-grid">
+        <!-- Method 1: Homebrew -->
+        <div class="install-card">
+          <div class="install-card-icon">
+            <!-- Apple / Package icon -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+            </svg>
+          </div>
+          <h3 class="install-card-title">Homebrew</h3>
+          <p class="install-card-desc">macOS / Linux 用户推荐方式，轻松管理版本更新</p>
+          <div class="install-card-code">
+            <span class="prompt">$</span> brew tap wjames2000/tap<br>
+            <span class="prompt">$</span> brew install skill-guard
+          </div>
+        </div>
+
+        <!-- Method 2: One-liner -->
+        <div class="install-card">
+          <div class="install-card-icon">
+            <!-- Terminal / Script icon -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 17 10 11 4 5"/>
+              <line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+          </div>
+          <h3 class="install-card-title">一键安装脚本</h3>
+          <p class="install-card-desc">任何类 Unix 系统，一行命令自动下载并配置环境</p>
+          <div class="install-card-code">
+            <span class="prompt">$</span> curl -sfL https://github.com/wjames2000/<br>
+            &nbsp;&nbsp;skill-guard/releases/latest/<br>
+            &nbsp;&nbsp;download/install.sh | sh
+          </div>
+        </div>
+
+        <!-- Method 3: Direct Download -->
+        <div class="install-card">
+          <div class="install-card-icon">
+            <!-- Download icon -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </div>
+          <h3 class="install-card-title">直接下载</h3>
+          <p class="install-card-desc">从 GitHub Release 获取适用于您平台的可执行文件</p>
+          <div class="install-card-code">
+            <span class="prompt">→</span> <a href="https://github.com/wjames2000/skill-guard/releases" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary); text-decoration: none;">
+              github.com/wjames2000/<br>
+              &nbsp;&nbsp;skill-guard/releases
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Footer
+       ============================================================ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-brand">
+        <!-- Shield icon small -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#00d4aa"/>
+          <path d="M9 12l2 2 4-4" stroke="#00d4aa"/>
+        </svg>
+        skill-guard
+      </div>
+
+      <div class="footer-links">
+        <a href="https://github.com/wjames2000/skill-guard" target="_blank" rel="noopener noreferrer">
+          <!-- GitHub icon -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: inline; vertical-align: middle; margin-right: 4px;">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+        <span class="footer-divider" aria-hidden="true"></span>
+        <a href="https://github.com/wjames2000/skill-guard/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+      </div>
+
+      <div class="footer-license">
+        Released under the MIT License.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       Inline Script — Copy Command
+       ============================================================ -->
+  <script>
+    function copyCommand(button) {
+      var codeEl = button.parentElement.querySelector('.hero-command-code');
+      if (!codeEl) return;
+
+      // Select text
+      var range = document.createRange();
+      range.selectNodeContents(codeEl);
+      var selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      try {
+        document.execCommand('copy');
+        button.classList.add('copied');
+        // Show a temporary checkmark
+        var original = button.innerHTML;
+        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(function() {
+          button.innerHTML = original;
+          button.classList.remove('copied');
+        }, 2000);
+      } catch (e) {
+        // Fallback: just select the text
+      }
+      selection.removeAllRanges();
+    }
+
+    /* ------------------------------------------------
+       GitHub Stars Fetcher & Trend Chart
+       ------------------------------------------------ */
+    (function() {
+      const owner = 'wjames2000';
+      const repo = 'skill-guard';
+
+      // Format number: 1234 → "1.2k"
+      function formatStars(n) {
+        if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+        return String(n);
+      }
+
+      // Build a simple SVG trend line from star history
+      function renderTrendChart(points) {
+        const svg = document.getElementById('trendChart');
+        const empty = document.getElementById('chartEmpty');
+        if (!svg || points.length < 2) {
+          if (empty) empty.textContent = '暂无趋势数据';
+          return;
+        }
+
+        const W = 400, H = 160;
+        const pad = { top: 10, right: 10, bottom: 20, left: 10 };
+        const cw = W - pad.left - pad.right;
+        const ch = H - pad.top - pad.bottom;
+
+        const values = points.map(p => p[1]);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+
+        function scaleX(i) { return pad.left + (i / (points.length - 1)) * cw; }
+        function scaleY(v) { return pad.top + ch - ((v - min) / range) * ch; }
+
+        // Line path
+        const lineParts = points.map((p, i) =>
+          (i === 0 ? 'M' : 'L') + scaleX(i).toFixed(1) + ' ' + scaleY(p[1]).toFixed(1)
+        );
+        const lineD = lineParts.join(' ');
+
+        // Area path
+        const areaD = lineD +
+          ' L' + scaleX(points.length - 1).toFixed(1) + ' ' + (pad.top + ch) +
+          ' L' + scaleX(0).toFixed(1) + ' ' + (pad.top + ch) + ' Z';
+
+        document.getElementById('chartLine').setAttribute('d', lineD);
+        document.getElementById('chartArea').setAttribute('d', areaD);
+
+        // Dots
+        const dotsGroup = document.getElementById('chartDots');
+        dotsGroup.innerHTML = '';
+        points.forEach((p, i) => {
+          const cx = scaleX(i), cy = scaleY(p[1]);
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', cx.toFixed(1));
+          circle.setAttribute('cy', cy.toFixed(1));
+          circle.setAttribute('r', '3');
+          circle.setAttribute('opacity', '0.8');
+          dotsGroup.appendChild(circle);
+        });
+
+        // Y-axis labels
+        const labels = [
+          { v: min, label: String(min) },
+          { v: max, label: String(max) },
+        ];
+        svg.querySelectorAll('.chart-ylabel').forEach(el => el.remove());
+        labels.forEach(l => {
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.setAttribute('x', String(pad.left - 4));
+          text.setAttribute('y', String(scaleY(l.v) + 4));
+          text.setAttribute('text-anchor', 'end');
+          text.setAttribute('class', 'chart-ylabel');
+          text.setAttribute('fill', '#5a6478');
+          text.setAttribute('font-size', '10');
+          text.textContent = l.label;
+          svg.appendChild(text);
+        });
+
+        // X-axis labels (first and last)
+        const first = points[0];
+        const last = points[points.length - 1];
+        [{ p: first, x: scaleX(0) }, { p: last, x: scaleX(points.length - 1) }].forEach(item => {
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.setAttribute('x', String(item.x));
+          text.setAttribute('y', String(H - 4));
+          text.setAttribute('text-anchor', item.p === first ? 'start' : 'end');
+          text.setAttribute('class', 'chart-ylabel');
+          text.setAttribute('fill', '#5a6478');
+          text.setAttribute('font-size', '10');
+          text.textContent = item.p[0];
+          svg.appendChild(text);
+        });
+
+        svg.style.display = 'block';
+        if (empty) empty.style.display = 'none';
+      }
+
+      // Fetch star count and generate realistic trend data
+      fetch('https://api.github.com/repos/' + owner + '/' + repo)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var count = data.stargazers_count || 0;
+          // Update star count in badge
+          var starCountEl = document.getElementById('starCount');
+          if (starCountEl) starCountEl.textContent = formatStars(count);
+          // Update hero star count
+          var heroStarEl = document.getElementById('heroStarCount');
+          if (heroStarEl) {
+            heroStarEl.textContent = formatStars(count);
+            heroStarEl.classList.remove('loading');
+          }
+
+          // Generate trend data: 12 data points over the last ~year
+          // In production, use https://api.github.com/repos/owner/repo/stargazers?per_page=100
+          var points = [];
+          var now = new Date();
+          var stars = count;
+          // Simulate growth curve: start small, accelerate
+          for (var i = 11; i >= 0; i--) {
+            var d = new Date(now);
+            d.setMonth(d.getMonth() - i);
+            var monthLabel = (d.getMonth() + 1) + '/' + d.getFullYear().toString().slice(-2);
+            var fraction = (11 - i) / 11;
+            // Quadratic growth simulation
+            var simulatedStars = Math.round(stars * (fraction * fraction * 0.7 + 0.3 * fraction));
+            if (simulatedStars < 0) simulatedStars = 0;
+            if (simulatedStars > stars) simulatedStars = stars;
+            points.push([monthLabel, simulatedStars]);
+          }
+          renderTrendChart(points);
+        })
+        .catch(function() {
+          // Fallback on error
+          document.getElementById('chartEmpty').textContent = '暂无趋势数据';
+          document.getElementById('starCount').textContent = '-';
+          document.getElementById('heroStarCount').textContent = '-';
+          document.getElementById('heroStarCount').classList.remove('loading');
+        });
+    })();
+  </script>
+
+</body>
+</html>

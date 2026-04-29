@@ -1,6 +1,8 @@
 package scanner
 
 import (
+	"fmt"
+	"os"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -66,11 +68,11 @@ func Scan(cfg *pkgtypes.Config) (*pkgtypes.ScanReport, error) {
 		allResults = append(allResults, res...)
 		if cfg.Verbose {
 			n := scanned.Add(1)
-			println("进度:", n, "/", len(files))
+			fmt.Fprintf(os.Stderr, "\r进度: %d / %d 文件", n, len(files))
 		}
 	}
 	if cfg.Verbose {
-		println("扫描完成")
+		fmt.Fprintln(os.Stderr)
 	}
 
 	r := report.Build(allResults, len(files), start)
