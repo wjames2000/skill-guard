@@ -33,6 +33,7 @@ type Config struct {
 	Sarif          bool
 	AIEnabled      bool
 	AIModel        string
+	AIEndpoint     string
 }
 
 func DefaultConfig() *Config {

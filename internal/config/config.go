@@ -14,4 +14,5 @@ type FileConfig struct {
 	Summary        bool     `yaml:"summary,omitempty"`
 	AIEnabled      bool     `yaml:"ai_enabled,omitempty"`
 	AIModel        string   `yaml:"ai_model,omitempty"`
+	AIEndpoint     string   `yaml:"ai_endpoint,omitempty"`
 }

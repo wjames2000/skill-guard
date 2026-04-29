@@ -87,13 +87,9 @@ func AIVerifyResults(results []*pkgtypes.MatchResult, cfg *pkgtypes.Config) []*p
 	}
 
 	aiCfg := &ai.AIConfig{
-		Enabled: cfg.AIEnabled,
-		Model:   cfg.AIModel,
-	}
-
-	if !ai.IsAvailable("") {
-		fmt.Fprintln(os.Stderr, "⚠️ AI 检测不可用: Ollama 未运行，跳过 AI 验证")
-		return results
+		Enabled:  cfg.AIEnabled,
+		Model:    cfg.AIModel,
+		Endpoint: cfg.AIEndpoint,
 	}
 
 	var verified []*pkgtypes.MatchResult

@@ -115,6 +115,11 @@ func parseFlags() *pkgtypes.Config {
 			if i < len(args) {
 				cfg.AIModel = args[i]
 			}
+		case "--ai-endpoint":
+			i++
+			if i < len(args) {
+				cfg.AIEndpoint = args[i]
+			}
 		case "--version":
 			printVersion()
 			os.Exit(0)
@@ -243,8 +248,9 @@ func printHelp() {
       --output string        将 JSON 结果导出到文件
       --summary              摘要模式
       --sarif                SARIF 格式输出
-      --ai                   启用 AI 辅助检测（需要本地 Ollama 服务）
-      --ai-model string      AI 模型名称（默认: llama3.2）
+      --ai                   启用 AI 辅助检测（默认 API: chat.zxhkuav.cn）
+      --ai-model string      AI 模型名称（默认: gemma-4-26b-a4b-it）
+      --ai-endpoint string   AI API 端点（默认: https://chat.zxhkuav.cn/v1）
       --version              显示版本信息
       completion [shell]     生成 shell 自动补全（bash/zsh/fish）
   -h, --help                 显示帮助信息
