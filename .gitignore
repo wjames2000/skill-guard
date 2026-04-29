@@ -1,0 +1,6 @@
+skill-guard
+skill-guard.test
+dist/
+.idea/
+*.swp
+*.swo
