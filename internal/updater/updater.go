@@ -13,6 +13,79 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// VersionInfo tracks installed rule versions
+type VersionInfo struct {
+	File      string `yaml:"file" json:"file"`
+	Version   string `yaml:"version" json:"version"`
+	Installed string `yaml:"installed" json:"installed"`
+	Source    string `yaml:"source" json:"source"`
+}
+
+type RuleVersionDB struct {
+	Versions []VersionInfo `yaml:"versions" json:"versions"`
+}
+
+func RecordInstallation(rulesDir, sourceURL string) error {
+	db := loadVersionDB(rulesDir)
+
+	filename := filepath.Base(sourceURL)
+	if filename == "" || !strings.HasSuffix(filename, ".yaml") {
+		filename = "rules.yaml"
+	}
+
+	var filtered []VersionInfo
+	for _, v := range db.Versions {
+		if v.File != filename {
+			filtered = append(filtered, v)
+		}
+	}
+
+	filtered = append(filtered, VersionInfo{
+		File:      filename,
+		Version:   time.Now().Format("2006-01-02"),
+		Installed: time.Now().Format(time.RFC3339),
+		Source:    sourceURL,
+	})
+
+	db.Versions = filtered
+	return saveVersionDB(rulesDir, db)
+}
+
+func ListVersions(rulesDir string) ([]VersionInfo, error) {
+	db := loadVersionDB(rulesDir)
+	return db.Versions, nil
+}
+
+func GetCurrentVersion(rulesDir, filename string) (*VersionInfo, error) {
+	db := loadVersionDB(rulesDir)
+	for _, v := range db.Versions {
+		if v.File == filename {
+			return &v, nil
+		}
+	}
+	return nil, fmt.Errorf("未找到版本信息: %s", filename)
+}
+
+func loadVersionDB(rulesDir string) RuleVersionDB {
+	path := filepath.Join(rulesDir, ".versions.yaml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return RuleVersionDB{}
+	}
+	var db RuleVersionDB
+	yaml.Unmarshal(data, &db)
+	return db
+}
+
+func saveVersionDB(rulesDir string, db RuleVersionDB) error {
+	path := filepath.Join(rulesDir, ".versions.yaml")
+	data, err := yaml.Marshal(db)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0640)
+}
+
 const (
 	defaultRulesURL = "https://github.com/wjames2000/skill-guard/releases/latest/download/builtin_rules.yaml"
 	updateCheckURL  = "https://api.github.com/repos/wjames2000/skill-guard/releases/latest"
@@ -118,6 +191,10 @@ func UpdateRulesFromSource(rulesDir, sourceURL string) error {
 
 	if _, err := io.Copy(f, resp.Body); err != nil {
 		return fmt.Errorf("写入规则文件失败: %w", err)
+	}
+
+	if err := RecordInstallation(rulesDir, sourceURL); err != nil {
+		return fmt.Errorf("记录版本信息失败: %w", err)
 	}
 	return nil
 }

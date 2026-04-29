@@ -136,6 +136,8 @@ func parseFlags() *pkgtypes.Config {
 			handleUpdate(args[i:])
 		case "init":
 			handleInit(args[i:])
+		case "rules":
+			handleRules(args[i:])
 		default:
 			if !strings.HasPrefix(args[i], "-") {
 				if i == 0 || strings.HasPrefix(args[i-1], "-") {
@@ -253,6 +255,7 @@ func printHelp() {
       --ai-endpoint string   AI API 端点（默认: https://chat.zxhkuav.cn/v1）
       --version              显示版本信息
       completion [shell]     生成 shell 自动补全（bash/zsh/fish）
+      rules                  规则管理（export/new/test）
   -h, --help                 显示帮助信息
 
 示例:

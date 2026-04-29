@@ -31,6 +31,8 @@ func handleUpdate(args []string) {
 		handleRuleInstall(args)
 	case "index":
 		handleUpdateIndex()
+	case "versions":
+		handleRuleVersions()
 	default:
 		fmt.Fprintf(os.Stderr, "用法:\n")
 		fmt.Fprintf(os.Stderr, "  skill-guard update check     — 检查工具版本更新\n")
@@ -39,6 +41,7 @@ func handleUpdate(args []string) {
 		fmt.Fprintf(os.Stderr, "  skill-guard update info      — 查看可用规则源\n")
 		fmt.Fprintf(os.Stderr, "  skill-guard update install <url> — 安装远程规则\n")
 		fmt.Fprintf(os.Stderr, "  skill-guard update index     — 刷新规则市场索引\n")
+		fmt.Fprintf(os.Stderr, "  skill-guard update versions  — 查看规则版本历史\n")
 		os.Exit(2)
 	}
 	os.Exit(0)
@@ -115,6 +118,23 @@ func handleRuleInstall(args []string) {
 		os.Exit(2)
 	}
 	fmt.Println("✅ 规则安装完成")
+}
+
+func handleRuleVersions() {
+	rulesDir := getRulesDir()
+	versions, err := updater.ListVersions(rulesDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+		os.Exit(2)
+	}
+	if len(versions) == 0 {
+		fmt.Println("暂无版本记录。运行 'skill-guard update rules' 后自动记录。")
+		return
+	}
+	fmt.Println("规则版本历史:")
+	for _, v := range versions {
+		fmt.Printf("  📄 %-30s v%-12s 安装于 %s\n", v.File, v.Version, v.Installed[:10])
+	}
 }
 
 func handleUpdateIndex() {
