@@ -54,7 +54,7 @@ func checkExtension(ext string, include, exclude []string) bool {
 
 func LoadGitIgnore(dir string) []string {
 	path := filepath.Join(dir, ".gitignore")
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304
 	if err != nil {
 		return nil
 	}

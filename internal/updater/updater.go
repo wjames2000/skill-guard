@@ -45,9 +45,11 @@ func UpdateRules(rulesDir string) error {
 	}
 	defer resp.Body.Close()
 
-	os.MkdirAll(rulesDir, 0755)
+	if err := os.MkdirAll(rulesDir, 0750); err != nil {
+		return fmt.Errorf("创建规则目录失败: %w", err)
+	}
 	dst := filepath.Join(rulesDir, "builtin_rules.yaml")
-	f, err := os.Create(dst)
+	f, err := os.Create(dst) // #nosec G304
 	if err != nil {
 		return fmt.Errorf("创建规则文件失败: %w", err)
 	}
