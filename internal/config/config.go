@@ -9,4 +9,7 @@ type FileConfig struct {
 	MaxSize        string   `yaml:"max_size,omitempty"`
 	Concurrency    int      `yaml:"concurrency,omitempty"`
 	DisableBuiltin bool     `yaml:"disable_builtin,omitempty"`
+	NoColor        bool     `yaml:"no_color,omitempty"`
+	OutputFile     string   `yaml:"output,omitempty"`
+	Summary        bool     `yaml:"summary,omitempty"`
 }

@@ -95,12 +95,29 @@ func parseFlags() *pkgtypes.Config {
 			}
 		case "--disable-builtin":
 			cfg.DisableBuiltin = true
+		case "--no-color":
+			cfg.NoColor = true
+		case "--output":
+			i++
+			if i < len(args) {
+				cfg.OutputFile = args[i]
+			}
+		case "--summary":
+			cfg.Summary = true
+		case "--sarif":
+			cfg.Sarif = true
 		case "--version":
 			printVersion()
 			os.Exit(0)
 		case "--help", "-h":
 			printHelp()
 			os.Exit(0)
+		case "completion":
+			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+				handleCompletion(args[i:])
+			} else {
+				handleCompletion([]string{"completion", "bash"})
+			}
 		default:
 			if !strings.HasPrefix(args[i], "-") {
 				if i == 0 || strings.HasPrefix(args[i-1], "-") {
@@ -147,6 +164,10 @@ func splitExt(s string) []string {
 }
 
 func runScan(cfg *pkgtypes.Config) error {
+	if cfg.NoColor {
+		output.DisableColor()
+	}
+
 	result, err := scanner.Scan(cfg)
 	if err != nil {
 		return err
@@ -156,7 +177,18 @@ func runScan(cfg *pkgtypes.Config) error {
 	result.TotalIssues = len(result.Results)
 	result.Summary = report.CalculateSummary(result.Results)
 
-	_ = output.Render(os.Stdout, result, cfg.JSONOutput, cfg.Quiet)
+	_ = output.Render(os.Stdout, result, cfg.JSONOutput, cfg.Quiet, cfg.Summary, cfg.Sarif)
+
+	if cfg.OutputFile != "" {
+		f, err := os.Create(cfg.OutputFile)
+		if err != nil {
+			return fmt.Errorf("创建输出文件失败: %w", err)
+		}
+		defer f.Close()
+		if err := output.Render(f, result, true, false, false, false); err != nil {
+			return fmt.Errorf("写入输出文件失败: %w", err)
+		}
+	}
 
 	if result.TotalIssues > 0 {
 		os.Exit(1)
@@ -190,7 +222,12 @@ func printHelp() {
       --max-size string      文件大小上限（默认: 10MB）
       --concurrency int      扫描并发数（默认: CPU 核数）
       --disable-builtin      禁用内置规则
+      --no-color             禁用彩色输出
+      --output string        将 JSON 结果导出到文件
+      --summary              摘要模式
+      --sarif                SARIF 格式输出
       --version              显示版本信息
+      completion [shell]     生成 shell 自动补全（bash/zsh/fish）
   -h, --help                 显示帮助信息
 
 示例:

@@ -26,6 +26,10 @@ type Config struct {
 	MaxSize        int64
 	Concurrency    int
 	DisableBuiltin bool
+	NoColor        bool
+	OutputFile     string
+	Summary        bool
+	Sarif          bool
 }
 
 func DefaultConfig() *Config {

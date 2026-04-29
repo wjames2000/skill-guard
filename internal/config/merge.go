@@ -32,6 +32,15 @@ func MergeWithCLI(cfg *pkgtypes.Config, fileCfg *FileConfig) *pkgtypes.Config {
 			cfg.MaxSize = v
 		}
 	}
+	if !cfg.NoColor {
+		cfg.NoColor = fileCfg.NoColor
+	}
+	if cfg.OutputFile == "" {
+		cfg.OutputFile = fileCfg.OutputFile
+	}
+	if !cfg.Summary {
+		cfg.Summary = fileCfg.Summary
+	}
 	return cfg
 }
 

@@ -21,6 +21,10 @@ const (
 
 var ColorEnabled = true
 
+func DisableColor() {
+	ColorEnabled = false
+}
+
 func init() {
 	if runtime.GOOS == "windows" {
 		ColorEnabled = false
