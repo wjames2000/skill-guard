@@ -18,11 +18,12 @@ func Scan(cfg *pkgtypes.Config) (*pkgtypes.ScanReport, error) {
 	start := time.Now()
 
 	files, err := file.Discover(cfg.Paths, &file.DiscoverOpts{
-		Ignore:     cfg.Ignore,
-		ExtInclude: cfg.ExtInclude,
-		ExtExclude: cfg.ExtExclude,
-		MaxSize:    cfg.MaxSize,
-		Verbose:    cfg.Verbose,
+		Ignore:            cfg.Ignore,
+		ExtInclude:        cfg.ExtInclude,
+		ExtExclude:        cfg.ExtExclude,
+		MaxSize:           cfg.MaxSize,
+		Verbose:           cfg.Verbose,
+		DiscoverGitIgnore: cfg.DiscoverGitIgnore,
 	})
 	if err != nil {
 		return nil, err

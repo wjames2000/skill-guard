@@ -10,11 +10,12 @@ import (
 )
 
 type DiscoverOpts struct {
-	Ignore     []string
-	ExtInclude []string
-	ExtExclude []string
-	MaxSize    int64
-	Verbose    bool
+	Ignore            []string
+	ExtInclude        []string
+	ExtExclude        []string
+	MaxSize           int64
+	Verbose           bool
+	DiscoverGitIgnore bool
 }
 
 func Discover(roots []string, opts *DiscoverOpts) ([]*pkgtypes.FileTarget, error) {
@@ -24,6 +25,13 @@ func Discover(roots []string, opts *DiscoverOpts) ([]*pkgtypes.FileTarget, error
 
 	ignorePatterns := append([]string{}, DefaultIgnorePatterns...)
 	ignorePatterns = append(ignorePatterns, opts.Ignore...)
+
+	if opts.DiscoverGitIgnore {
+		for _, root := range roots {
+			gitignorePatterns := LoadGitIgnore(root)
+			ignorePatterns = append(ignorePatterns, gitignorePatterns...)
+		}
+	}
 
 	var files []*pkgtypes.FileTarget
 	for _, root := range roots {

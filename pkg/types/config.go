@@ -23,9 +23,10 @@ type Config struct {
 	Ignore         []string
 	ExtInclude     []string
 	ExtExclude     []string
-	MaxSize        int64
-	Concurrency    int
-	DisableBuiltin bool
+	MaxSize           int64
+	Concurrency       int
+	DisableBuiltin    bool
+	DiscoverGitIgnore bool
 	NoColor        bool
 	OutputFile     string
 	Summary        bool

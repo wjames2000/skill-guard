@@ -93,6 +93,8 @@ func parseFlags() *pkgtypes.Config {
 					cfg.Concurrency = v
 				}
 			}
+		case "--gitignore":
+			cfg.DiscoverGitIgnore = true
 		case "--disable-builtin":
 			cfg.DisableBuiltin = true
 		case "--no-color":
@@ -118,6 +120,8 @@ func parseFlags() *pkgtypes.Config {
 			} else {
 				handleCompletion([]string{"completion", "bash"})
 			}
+		case "update":
+			handleUpdate(args[i:])
 		default:
 			if !strings.HasPrefix(args[i], "-") {
 				if i == 0 || strings.HasPrefix(args[i-1], "-") {

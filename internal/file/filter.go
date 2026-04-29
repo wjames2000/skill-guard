@@ -1,6 +1,7 @@
 package file
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -49,6 +50,26 @@ func checkExtension(ext string, include, exclude []string) bool {
 		return false
 	}
 	return true
+}
+
+func LoadGitIgnore(dir string) []string {
+	path := filepath.Join(dir, ".gitignore")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var patterns []string
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if strings.HasPrefix(line, "!") {
+			continue
+		}
+		patterns = append(patterns, strings.TrimSuffix(line, "/"))
+	}
+	return patterns
 }
 
 func isDefaultExt(ext string) bool {
