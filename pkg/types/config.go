@@ -16,6 +16,7 @@ type Config struct {
 	Paths          []string
 	ConfigFile     string
 	RulesFile      string
+	LuaRulesDir    string
 	Severity       string
 	JSONOutput     bool
 	Quiet          bool

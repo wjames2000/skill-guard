@@ -8,7 +8,8 @@ import (
 )
 
 type Engine struct {
-	rules []*Rule
+	rules    []*Rule
+	luaRules []*LuaRule
 }
 
 func New(rulesFile string, disableBuiltin bool) (*Engine, error) {
@@ -34,7 +35,15 @@ func New(rulesFile string, disableBuiltin bool) (*Engine, error) {
 	return eng, nil
 }
 
+// Match 对目标文件执行所有规则匹配（正则 + LUA）
 func (e *Engine) Match(target *pkgtypes.FileTarget) []*pkgtypes.MatchResult {
+	results := e.matchRegex(target)
+	results = append(results, e.matchLua(target)...)
+	return results
+}
+
+// matchRegex 执行正则规则匹配
+func (e *Engine) matchRegex(target *pkgtypes.FileTarget) []*pkgtypes.MatchResult {
 	if !file.IsValidUTF8(target.Path) {
 		return nil
 	}
@@ -56,6 +65,49 @@ func (e *Engine) Match(target *pkgtypes.FileTarget) []*pkgtypes.MatchResult {
 		for lineNum, line := range lines {
 			result := rule.MatchLine(line, target.RelPath, lineNum+1)
 			if result != nil {
+				results = append(results, result)
+				break
+			}
+		}
+	}
+	return results
+}
+
+// LoadLuaRules 从指定目录加载所有 .lua 规则文件
+func (e *Engine) LoadLuaRules(luaDir string) error {
+	rules, err := LoadLuaRulesFromDir(luaDir)
+	if err != nil {
+		return err
+	}
+	e.luaRules = append(e.luaRules, rules...)
+	return nil
+}
+
+// matchLua 执行 LUA 脚本规则匹配
+func (e *Engine) matchLua(target *pkgtypes.FileTarget) []*pkgtypes.MatchResult {
+	if len(e.luaRules) == 0 {
+		return nil
+	}
+	if !file.IsValidUTF8(target.Path) {
+		return nil
+	}
+	if !file.IsWithinSizeLimit(target.Path, 10*1024*1024) {
+		return nil
+	}
+	lines, err := file.ReadLines(target.Path)
+	if err != nil {
+		return nil
+	}
+	var results []*pkgtypes.MatchResult
+	for _, luaRule := range e.luaRules {
+		if !luaRule.MatchesFileType(target.Ext) {
+			continue
+		}
+		for lineNum, line := range lines {
+			result := luaRule.MatchLine(line, target.RelPath)
+			if result != nil {
+				result.FilePath = target.RelPath
+				result.LineNumber = lineNum + 1
 				results = append(results, result)
 				break
 			}

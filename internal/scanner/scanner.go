@@ -3,6 +3,7 @@ package scanner
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -36,6 +37,10 @@ func Scan(cfg *pkgtypes.Config) (*pkgtypes.ScanReport, error) {
 	eng, err := engine.New(cfg.RulesFile, cfg.DisableBuiltin)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := loadLuaRules(eng, cfg); err != nil && cfg.Verbose {
+		fmt.Fprintf(os.Stderr, "WARN: LUA 规则加载失败: %v\n", err)
 	}
 
 	numWorkers := cfg.Concurrency
@@ -110,6 +115,26 @@ func AIVerifyResults(results []*pkgtypes.MatchResult, cfg *pkgtypes.Config) []*p
 		}
 	}
 	return verified
+}
+
+// loadLuaRules 加载 LUA 规则目录中的脚本规则。
+// 优先使用配置的路径，否则默认尝试 ~/.config/skill-guard/lua-rules/。
+func loadLuaRules(eng *engine.Engine, cfg *pkgtypes.Config) error {
+	luaDir := cfg.LuaRulesDir
+	if luaDir == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return nil // 无法获取 home 目录，跳过默认路径
+		}
+		luaDir = filepath.Join(home, ".config", "skill-guard", "lua-rules")
+	}
+
+	// 目录不存在时静默跳过
+	if _, err := os.Stat(luaDir); os.IsNotExist(err) {
+		return nil
+	}
+
+	return eng.LoadLuaRules(luaDir)
 }
 
 func emptyReport(start time.Time) *pkgtypes.ScanReport {

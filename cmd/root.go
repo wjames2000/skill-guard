@@ -59,6 +59,11 @@ func parseFlags() *pkgtypes.Config {
 			if i < len(args) {
 				cfg.RulesFile = args[i]
 			}
+		case "--lua-rules":
+			i++
+			if i < len(args) {
+				cfg.LuaRulesDir = args[i]
+			}
 		case "--severity", "-s":
 			i++
 			if i < len(args) {
@@ -236,6 +241,7 @@ func printHelp() {
 标志:
   -c, --config string        指定配置文件路径
   -r, --rules string         自定义规则文件（YAML/JSON）
+      --lua-rules string     LUA 脚本规则目录（默认: ~/.config/skill-guard/lua-rules/）
   -s, --severity string      最低严重级别 (critical/high/medium/low)
   -j, --json                 JSON 格式输出
   -q, --quiet                安静模式（仅显示有问题文件）
